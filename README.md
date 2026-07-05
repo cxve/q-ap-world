@@ -1,3 +1,13 @@
+# Q-AP World
+
+This world brings Archipelago multiworld support to Q-UP.
+
+For more information regarding this world, check the [Game Page](<https://github.com/cxve/q-ap-world/blob/main-q-up/worlds/q_up/docs/en_Q-UP.md>).
+
+Installation instructions can be found in the [Setup Guide](<https://github.com/cxve/q-ap-world/blob/main-q-up/worlds/q_up/docs/setup_en.md>).
+
+The original readme file is preserved below.
+
 # [Archipelago](https://archipelago.gg) ![Discord Shield](https://discordapp.com/api/guilds/731205301247803413/widget.png?style=shield) | [Install](https://github.com/ArchipelagoMW/Archipelago/releases)
 
 Archipelago provides a generic framework for developing multiworld capability for game randomizers. In all cases,
