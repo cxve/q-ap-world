@@ -72,9 +72,6 @@ class ItemPoolProgressiveCrystalsNum(Range):
     range_start = 20
     range_end = 50
     default = 35
-    special_range_names = {
-        "vanilla": 35
-    }
 
 class ItemPoolEfficiencyCrystals(Range):
     """
@@ -89,10 +86,6 @@ class ItemPoolEfficiencyCrystals(Range):
     range_start = 1
     range_end = 4
     default = 2
-    special_range_names = {
-        "vanilla": 1,
-        "recommended": 2
-    }
 
 class ItemPoolEfficiencyUpgradePoints(Range):
     """
@@ -107,9 +100,6 @@ class ItemPoolEfficiencyUpgradePoints(Range):
     range_start = 1
     range_end = 4
     default = 2
-    special_range_names = {
-        "recommended": 2
-    }
 
 class SanityNumChallenges(Range):
     """
@@ -121,10 +111,6 @@ class SanityNumChallenges(Range):
     range_start = 0
     range_end = 30
     default = 10
-    special_range_names = {
-        "disabled": 0,
-        "default": 10
-    }
 
 class SanityNumChallengesTier4(Range):
     """
