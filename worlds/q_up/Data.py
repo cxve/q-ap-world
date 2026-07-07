@@ -83,7 +83,8 @@ signature_skill_names = {
         "Surrounded by Idiots",
         "Yomi",
         "Domination",
-        "Momentum"
+        "Momentum",
+        "Carry"
     ],
     "troll": [
         "2Face",
