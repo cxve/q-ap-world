@@ -111,7 +111,8 @@ signature_skill_names = {
         "Dig",
         "Go Ham",
         "Hot and Cold",
-        "Infamous"
+        "Infamous",
+        "Solo"
     ],
     "streamer": [
         "Subscribe",
