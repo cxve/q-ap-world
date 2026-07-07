@@ -22,7 +22,7 @@ class ItemPoolTotalSkillNum(Range):
     """
     Set the maximum amount of skills you want to find in total.
     This amount includes the amount of signature and upgradable skills.
-    Defaults to 35, which is close to the vanilla amount.
+    Defaults to 35, which is the vanilla amount.
 
     To avoid fill errors, the generator may decide to lower this number automatically.
     """
