@@ -73,7 +73,7 @@ feature_items: List[ItemDict] = [
     {"name": "PROGRESSIVE_CHALLENGES", "count": 2, "classification": ItemClassification.progression},
     {"name": "PROGRESSIVE_ITEM_SLOT", "count": 4, "classification": ItemClassification.progression},
     {"name": "PROGRESSIVE_SHARD_SLOT_CAPACITY", "count": 2, "classification": ItemClassification.progression},
-    {"name": "HONOR_DUELS", "count": 1, "classification": ItemClassification.filler},
+    {"name": "HONOR_DUELS", "count": 1, "classification": ItemClassification.useful},
     {"name": "PROGRESSIVE_SHOP_SLOT", "count": 5, "classification": ItemClassification.filler},
     {"name": "PROGRESSIVE_QBLOCK_BREAKER", "count": 9, "classification": ItemClassification.progression},
     {"name": "TRICKLE_DOWN_", "count": 1, "classification": ItemClassification.filler},
