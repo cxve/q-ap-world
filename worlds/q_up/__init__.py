@@ -121,7 +121,6 @@ class QUPworld(World):
             _tags = tags.copy()
             # check tag dependencies
             if skill in special_require_any and len(set(skills) & set(tag_to_skill[special_require_any[skill]])) < 1:
-                print("trying to add any required skill")
                 skill_add_from_pool(_skills, _tags, tag_to_skill[special_require_any[skill]], 1)
                 # was not able to add this skill, skip!
                 if len(_skills) is len(skills): return
@@ -129,11 +128,9 @@ class QUPworld(World):
             num_skill_current = len(_skills)
             # check specific dependencies
             if skill in special_require_specific and special_require_specific[skill] not in _skills:
-                print("trying to add specific required skill")
                 skill_add(_skills, _tags, special_require_specific[skill])
                 # was not able to add this skill, skip!
                 if len(_skills) is num_skill_current:
-                    print("could not satisfy condition, return!")
                     return
 
             # if this skill tag category is full, skip
@@ -240,8 +237,6 @@ class QUPworld(World):
             pool_unused = list(set(my_flex_skills) ^ set(skills))
             self.random.shuffle(pool_unused)
             skill_add_from_pool(skills, tags, pool_unused, num_total_skills - len(skills))
-
-            print([skills, len(skills)])
         else:
             skills = []
             skill_add_from_pool(skills, [], pool_fixed, num_fixed_skills)
