@@ -59,6 +59,16 @@ class ItemPoolFixedSkillNum(Range):
     range_end = 18
     default = 12
 
+class ItemPoolHypernodeNum(Range):
+    """
+    Hypernodes are unique powerful nodes purchasable in the item shop.
+    In vanilla, they are unlocked by reaching Novice with a champ.
+    """
+    display_name = "Number of Hypernode items"
+    range_start = 0
+    range_end = 8
+    default = 3
+
 class ItemPoolProgressiveCrystalsNum(Range):
     """
     Crystals are usually a major part of the game's progression,
@@ -220,6 +230,7 @@ class QUPoptions(PerGameCommonOptions):
     itemPoolTotalSkillNum: ItemPoolTotalSkillNum
     #itemPoolSignaturePercent: ItemPoolSignaturePercent
     itemPoolFixedSkillNum: ItemPoolFixedSkillNum
+    itemPoolHypernodeNum: ItemPoolHypernodeNum
 
     itemPoolSkillUpgradeNum: ItemPoolSkillUpgradeNum
     #itemPoolCorruptionShardNum: ItemPoolCorruptionShardNum

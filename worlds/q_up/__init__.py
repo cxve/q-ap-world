@@ -6,7 +6,7 @@ from Options import OptionGroup
 from worlds.AutoWorld import World, WebWorld
 from .Data import skill_names, skill_names_flat, signature_skill_names, signature_skill_names_flat, champ, \
     upgradable_skill_names_flat, features, skill_cat_to_idx, tagged_skills, special_require_any, tag_to_skill, \
-    special_require_specific
+    special_require_specific, hypernode_names
 from .Items import base_id, QUPitem, filler_items, all_items, signature_skills, upgradable_skills, generic_items, \
     ItemDict, categorized_signature_skills, feature_items, item_name_groups
 from .Locations import all_locations, QUPlocation, rank_location_ids, rank_locations, level_location_ids, \
@@ -88,6 +88,7 @@ class QUPworld(World):
         num_fixed_skills = self.options.itemPoolFixedSkillNum.value
         num_total_skills = self.options.itemPoolTotalSkillNum.value
         num_fixed_skills = num_fixed_skills if num_fixed_skills < num_total_skills else num_total_skills
+        num_hypernodes = self.options.itemPoolHypernodeNum.value
 
         num_challenges = self.options.sanityNumChallenges.value
 
@@ -254,6 +255,9 @@ class QUPworld(World):
                 self.items_added += 1
 
         create_items(list(set(skills)))
+        _hypernodes = hypernode_names.copy()
+        self.random.shuffle(_hypernodes)
+        create_items(_hypernodes[:num_hypernodes])
 
         # just add shop items to the pool
         for item in feature_items:

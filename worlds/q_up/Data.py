@@ -278,6 +278,17 @@ upgradable_skill_names = {
     ]
 }
 
+hypernode_names = [
+    "Jackpot",
+    "Resurrection",
+    "Queen",
+    "Hoard",
+    "A-List",
+    "Hypercapitalist",
+    "39_CATCH_FIRE",
+    "Ψ"
+]
+
 upgradable_skill_names_flat = (
     functools.reduce(operator.iconcat, [upgradable_skill_names[key] for key in upgradable_skill_names], []))
 
