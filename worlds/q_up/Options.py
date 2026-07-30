@@ -18,6 +18,36 @@ class Champ(Choice):
     option_wizard = 7
     default = "random"
 
+class Goal(Choice):
+    """
+    Choose which rank must be reached in order to goal.
+
+    Novice: Reach the end of the game with the champ. Recommended: 12 fixed skills, 35 skills total.
+    """
+    display_name = "Goal Condition"
+    option_novice = 55
+    option_fifty = 50
+    option_anomaly = 35
+    option_master = 25
+    default = 55
+
+class GoalAutoBalance(DefaultOnToggle):
+    """
+    Highly recommended if you are playing with default options,
+    or if your options are balanced for "Novice" Goal Condition.
+
+    If this is enabled, the generator will adjust the following options:
+    - Total Skill Number
+    - Fixed Skill Number
+    - Upgrade Point Number
+
+    Adjustments are based on your selected goal, here are examples:
+    - Fifty: Reduce the numbers by ~10%
+    - Anomaly:
+    - Master:
+    """
+    display_name = "Automatically Adjust Goal Balancing"
+
 class ItemPoolTotalSkillNum(Range):
     """
     Set the maximum amount of skills you want to find in total.
@@ -250,3 +280,5 @@ class QUPoptions(PerGameCommonOptions):
 
     sanityNumChallenges: SanityNumChallenges
     sanityNumChallengesTier4: SanityNumChallengesTier4
+    goal: Goal
+    goalAutoBalance: GoalAutoBalance

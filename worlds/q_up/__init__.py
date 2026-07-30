@@ -313,7 +313,7 @@ class QUPworld(World):
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 
     def fill_slot_data(self) -> Dict[str, Any]:
-        return self.options.as_dict("champ",
+        return self.options.as_dict("champ", "goal",
                                     "itemPoolEfficiencyCrystals",
                                     "itemPoolEfficiencyUpgradePoints",
                                     "sanityNumChallenges",
