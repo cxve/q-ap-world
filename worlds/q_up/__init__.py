@@ -27,6 +27,16 @@ class QUPweb(WebWorld):
             Options.ItemPoolEfficiencyUpgradePoints,
             Options.ItemPoolEfficiencyCrystals
         ]),
+        OptionGroup("Item Distribution", [
+            Options.SkillDistMode,
+            Options.SkillDistSignature,
+            Options.SkillDistQFlat,
+            Options.SkillDistQMult,
+            Options.SkillDistTrigger,
+            Options.SkillDistGold,
+            Options.SkillDistXP,
+            Options.SkillDistOther
+        ]),
         OptionGroup("Sanity", [
            Options.SanityNumChallenges,
             Options.SanityNumChallengesTier4,
