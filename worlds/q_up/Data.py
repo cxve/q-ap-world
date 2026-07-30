@@ -665,6 +665,11 @@ tagged_skills = {
     "Communicator": ["avs_add"]
 }
 
+tag_to_skill = {}
+for k, v in tagged_skills.items():
+    for tag in v:
+        tag_to_skill[tag] = tag_to_skill.get(tag, []) + [k]
+
 special_require_any = {
     "Angel": "q_down",
     "Insurance Scam": "q_down",
@@ -683,4 +688,12 @@ special_require_specific = {
     "10_GOTO_07": "07_GOTO_05",
     "07_GOTO_05": "05_GOTO_03",
     "03_GOTO_01": "01_START"
+}
+
+skill_cat_to_idx = {
+    "q_flat": 0,
+    "q_mult": 1,
+    "trigger": 2,
+    "gold": 3,
+    "xp": 4
 }
