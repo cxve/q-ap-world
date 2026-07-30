@@ -101,6 +101,97 @@ class ItemPoolEfficiencyUpgradePoints(Range):
     range_end = 4
     default = 2
 
+class SkillDistMode(Choice):
+    """
+    Choose how the generator should distribute skills of certain types.
+
+    Disabled: Skill type distribution will be entirely random and the settings below will be ignored.
+    Approx: The amount of each skill type will be roughly as you defined below.
+    Exact: You will receive exactly the distribution to defined below.
+    """
+    display_name = "Skill Distribution Mode"
+    option_disabled = 0
+    option_approx = 1
+    option_exact = 2
+    default = 1
+
+class SkillDistQFlat(Range):
+    """
+    Set how many skills should be of type "Flat Q".
+    Higher values = more skills of that type, lower values = fewer skills of that type.
+    Based on the game's default skill distribution, the recommended value is 8.
+    """
+    display_name = "Skill Weight: Flat Q"
+    range_start = 5
+    range_end = 15
+    default = 8
+
+class SkillDistQMult(Range):
+    """
+    Set how many skills should be of type "Q Mult".
+    Higher values = more skills of that type, lower values = fewer skills of that type.
+    Based on the game's default skill distribution, the recommended value is 7 or 8.
+    """
+    display_name = "Skill Weight: Q Mult"
+    range_start = 5
+    range_end = 15
+    default = 7
+
+class SkillDistTrigger(Range):
+    """
+    Set how many skills should be of type "Trigger".
+    Higher values = more skills of that type, lower values = fewer skills of that type.
+    Based on the game's default skill distribution, the recommended value is 10.
+    """
+    display_name = "Skill Weight: Trigger"
+    range_start = 5
+    range_end = 15
+    default = 10
+
+class SkillDistGold(Range):
+    """
+    Set how many skills should be of type "Gold".
+    Higher values = more skills of that type, lower values = fewer skills of that type.
+    Based on the game's default skill distribution, the recommended value is 2.
+    """
+    display_name = "Skill Weight: Gold"
+    range_start = 0
+    range_end = 5
+    default = 2
+
+class SkillDistXP(Range):
+    """
+    Set how many skills should be of type "XP".
+    Higher values = more skills of that type, lower values = fewer skills of that type.
+    Based on the game's default skill distribution, the recommended value is 2.
+    """
+    display_name = "Skill Weight: XP"
+    range_start = 0
+    range_end = 5
+    default = 2
+
+class SkillDistOther(Range):
+    """
+    Set how many skills should be of other types not listed above.
+    Higher values = more skills of that type, lower values = fewer skills of that type.
+    Based on the game's default skill distribution, the recommended value is 6.
+    """
+    display_name = "Skill Weight: Other"
+    range_start = 0
+    range_end = 15
+    default = 6
+
+class SkillDistSignature(Range):
+    """
+    Most champion have special skills that can only be used in combination with their gimmick.
+    For example: Luke's Action Junky requires his Tiltmeter gimmick to work.
+    This setting forces some of your skills to be signature skills, making sure your gimmick is not useless.
+    """
+    display_name = "Maximum Percentage of Signature Skills"
+    range_start = 0
+    range_end = 50
+    default = 25
+
 class SanityNumChallenges(Range):
     """
     This setting adds special challenges that reward location checks.
@@ -136,6 +227,15 @@ class QUPoptions(PerGameCommonOptions):
     itemPoolEfficiencyCrystals: ItemPoolEfficiencyCrystals
     #itemPoolEfficiencyCorruptionShards: ItemPoolEfficiencyCorruptionShards
     itemPoolEfficiencyUpgradePoints: ItemPoolEfficiencyUpgradePoints
+
+    skillDistMode: SkillDistMode
+    skillDistQFlat: SkillDistQFlat
+    skillDistQMult: SkillDistQMult
+    skillDistTrigger: SkillDistTrigger
+    skillDistGold: SkillDistGold
+    skillDistXP: SkillDistXP
+    skillDistOther: SkillDistOther
+    skillDistSignature: SkillDistSignature
 
     sanityNumChallenges: SanityNumChallenges
     sanityNumChallengesTier4: SanityNumChallengesTier4
