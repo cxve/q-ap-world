@@ -1,19 +1,18 @@
-import math
-from math import ceil
+from math import floor, ceil
 from typing import Any, Dict
 
 from BaseClasses import Item, Tutorial, Region, ItemClassification
 from Options import OptionGroup
 from worlds.AutoWorld import World, WebWorld
 from .Data import skill_names, skill_names_flat, signature_skill_names, signature_skill_names_flat, champ, \
-    upgradable_skill_names_flat, features
+    upgradable_skill_names_flat, features, skill_cat_to_idx, tagged_skills, special_require_any, tag_to_skill, \
+    special_require_specific
 from .Items import base_id, QUPitem, filler_items, all_items, signature_skills, upgradable_skills, generic_items, \
-    ItemDict, categorized_signature_skills, feature_items, skills, item_name_groups
+    ItemDict, categorized_signature_skills, feature_items, item_name_groups
 from .Locations import all_locations, QUPlocation, rank_location_ids, rank_locations, level_location_ids, \
     level_locations, feature_location_ids, build_challenge_location_ids, all_location_ids
 from .Options import QUPoptions
 from .Rules import QUPrules
-
 
 class QUPweb(WebWorld):
     theme = "partyTime"
@@ -86,6 +85,9 @@ class QUPworld(World):
     def create_items(self) -> None:
         num_upgrade_points = self.options.itemPoolSkillUpgradeNum.value
         num_crystals = self.options.itemPoolProgressiveCrystalsNum.value
+        num_fixed_skills = self.options.itemPoolFixedSkillNum.value
+        num_total_skills = self.options.itemPoolTotalSkillNum.value
+        num_fixed_skills = num_fixed_skills if num_fixed_skills < num_total_skills else num_total_skills
 
         num_challenges = self.options.sanityNumChallenges.value
 
@@ -99,24 +101,159 @@ class QUPworld(World):
         my_flex_skills = list(my_flex_skills) + list(signature_skill_names[champ_key])
         my_flex_skills = set(my_flex_skills) - set(upgradable_skill_names_flat)
         my_flex_skills = list(my_flex_skills)
+        self.random.shuffle(my_flex_skills)
 
-        my_fixed_signature_skills = list(set(upgradable_skill_names_flat) & set(signature_skill_names[champ_key]))
-        my_fixed_skills = set(upgradable_skill_names_flat) - set(signature_skill_names_flat)
-        my_fixed_skills = list(my_fixed_skills) + list(my_fixed_signature_skills)
+        pool_fixed = set(upgradable_skill_names_flat) - set(signature_skill_names_flat)
+        pool_fixed = list(pool_fixed) + list(set(upgradable_skill_names_flat) & set(signature_skill_names[champ_key]))
+        self.random.shuffle(pool_fixed)
 
-        num_fixed_skills = self.options.itemPoolFixedSkillNum.value
-        num_total_skills = self.options.itemPoolTotalSkillNum.value
-        num_fixed_skills = num_fixed_skills if num_fixed_skills < num_total_skills else num_total_skills
+        dist_mode = self.options.skillDistMode
 
-        def create_items(pool, num):
+        def skill_add(skills, tags, skill):
+            # if skill is invalid for this champ, skip
+            if skill not in my_skills: return
+
+            # if skill is already selected, skip
+            if skill in skills: return
+
+            _skills = skills.copy()
+            _tags = tags.copy()
+            # check tag dependencies
+            if skill in special_require_any and len(set(skills) & set(tag_to_skill[special_require_any[skill]])) < 1:
+                print("trying to add any required skill")
+                skill_add_from_pool(_skills, _tags, tag_to_skill[special_require_any[skill]], 1)
+                # was not able to add this skill, skip!
+                if len(_skills) is len(skills): return
+
+            num_skill_current = len(_skills)
+            # check specific dependencies
+            if skill in special_require_specific and special_require_specific[skill] not in _skills:
+                print("trying to add specific required skill")
+                skill_add(_skills, _tags, special_require_specific[skill])
+                # was not able to add this skill, skip!
+                if len(_skills) is num_skill_current:
+                    print("could not satisfy condition, return!")
+                    return
+
+            # if this skill tag category is full, skip
+            if dist_mode > 0:
+                skill_tags = tagged_skills[skill]
+                if len(skill_tags) > 0 and skill_tags[0] in skill_cat_to_idx:
+                    tag = skill_cat_to_idx[skill_tags[0]]
+                else:
+                    tag = 5
+                if _tags[tag] >= num_skill_cat[tag]: return
+                for i in range(len(tags)): tags[i] = _tags[i]
+                tags[tag] += 1
+
+            skills.extend(set(skills) ^ set(_skills) ^ {skill})
+
+        def skill_add_from_pool(skills, tags, pool, num):
+            num_start = len(skills)
+            for i in range(len(pool)):
+                skill_add(skills, tags, pool[i])
+                if len(skills) - num_start >= num: return
+
+        if dist_mode > 0:
+            dist = [
+                self.options.skillDistQFlat.value,
+                self.options.skillDistQMult.value,
+                self.options.skillDistTrigger.value,
+                self.options.skillDistGold.value,
+                self.options.skillDistXP.value,
+                self.options.skillDistOther.value,
+            ]
+            dist_signature = self.options.skillDistSignature.value
+
+            # apply approx mode
+            if dist_mode == 1:
+                if dist_signature > 6: dist_signature += self.random.choice([-3, 0, 3])
+                for i in range(len(dist)):
+                    x = dist[i]
+                    if x > 1:
+                        x += self.random.choice([-1, 0, 1])
+                        dist[i] = x
+
+            num_signature = ceil(dist_signature / 100 * num_total_skills)
+
+            # normalize weights
+            dist_normal = [d / sum(dist) for d in dist]
+
+            # convert normalized weights to skill amounts
+            dist_skill_total = 0
+            dist_skill_exact = []
+
+            # first: remove rare skill categories from distribution
+            for i in range(len(dist_normal)):
+                d = dist_normal[i]
+                num = d * num_total_skills
+                if 0 < num < 1:
+                    num = 1
+                    dist_skill_total += num
+                    dist_normal[i] = 0
+                dist_skill_exact.append(num)
+
+            # then: recalculate remaining skill amount and distribution
+            dist_normal = [d / sum(dist_normal) for d in dist_normal]
+            for i in range(len(dist_skill_exact)):
+                num = dist_skill_exact[i]
+                d = dist_normal[i]
+                if num > 1: dist_skill_exact[i] = d * (num_total_skills - dist_skill_total)
+
+            # then split remainder
+            num_skill_cat = [floor(d) for d in dist_skill_exact]
+            remainder = num_total_skills - sum(num_skill_cat)
+            fractions = [(d % 1, i) for i, d in enumerate(dist_skill_exact)]
+            fractions.sort(reverse=True)
+            for i in range(remainder): num_skill_cat[fractions[i][1]] += 1
+
+            # create skill pools
+            pool_signature = signature_skill_names[champ_key].copy()
+            self.random.shuffle(pool_signature)
+
+            other_skills = my_flex_skills.copy()
+            pool_tags = []
+            for key in skill_cat_to_idx:
+                _skills = []
+                for skill in tag_to_skill[key]:
+                    if skill in my_flex_skills:
+                        _skills.append(skill)
+                        if skill in other_skills: other_skills.remove(skill)
+                pool_tags.append(_skills)
+            pool_tags.append(other_skills)
+            for pool in pool_tags: self.random.shuffle(pool)
+
+            # list of all valid skills for this champ
+            my_skills = set(skill_names_flat) - set(signature_skill_names_flat)
+            my_skills = list(my_skills) + list(signature_skill_names[champ_key])
+
+            # fill the skill slots
+            skills = []
+            tags = [0, 0, 0, 0, 0, 0]
+
+            skill_add_from_pool(skills, tags, pool_fixed, num_fixed_skills)
+            skill_add_from_pool(skills, tags, pool_signature, num_signature)
+            for i in range(6):
+                skill_add_from_pool(skills, tags, pool_tags[i], num_skill_cat[i] - tags[i])
+
+            pool_unused = list(set(my_flex_skills) ^ set(skills))
+            self.random.shuffle(pool_unused)
+            skill_add_from_pool(skills, tags, pool_unused, num_total_skills - len(skills))
+
+            print([skills, len(skills)])
+        else:
+            skills = []
+            skill_add_from_pool(skills, [], pool_fixed, num_fixed_skills)
+            skill_add_from_pool(skills, [], my_flex_skills, num_total_skills - len(skills))
+
+        def create_items(pool):
             self.random.shuffle(pool)
-            for i in range(num):
+            for i in range(len(pool)):
                 new_item = self.create_item(pool[i])
                 self.multiworld.itempool.append(new_item)
                 self.items_added += 1
 
-        create_items(list(set(my_fixed_skills)), num_fixed_skills)
-        create_items(list(set(my_flex_skills)), num_total_skills - num_fixed_skills)
+        create_items(list(set(skills)))
 
         # just add shop items to the pool
         for item in feature_items:
@@ -177,4 +314,3 @@ class QUPworld(World):
                                     "itemPoolEfficiencyUpgradePoints",
                                     "sanityNumChallenges",
                                     "sanityNumChallengesTier4")
-
