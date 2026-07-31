@@ -281,9 +281,12 @@ class QUPworld(World):
             self.multiworld.itempool.append(new_item)
 
     def create_regions(self) -> None:
+        goal_rank = self.options.goal.value
         self.multiworld.regions.append(Region("Game", self.player, self.multiworld))
         region = self.get_region("Game")
-        region.add_locations({ location: rank_location_ids[location] for location in rank_locations })
+        _rank_location_ids = rank_location_ids.copy()
+        if goal_rank < 55: _rank_location_ids[rank_locations[goal_rank - 1]] = None
+        region.add_locations({ location: _rank_location_ids[location] for location in rank_locations })
         region.add_locations({ location: level_location_ids[location] for location in level_locations })
         region.add_locations({ location: feature_location_ids[location] for location in features })
         challenges = [0, 0, 0, 0]
@@ -304,7 +307,9 @@ class QUPworld(World):
 
     def set_rules(self) -> None:
         Rules.QUPrules(self).set_all_rules()
-        self.multiworld.get_location("Novice", self.player).place_locked_item(self.create_event("Victory"))
+        goal_rank = self.options.goal.value
+        goal_rank_name = rank_locations[goal_rank - 1] if goal_rank < 55 else "Novice"
+        self.multiworld.get_location(goal_rank_name, self.player).place_locked_item(self.create_event("Victory"))
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 
     def fill_slot_data(self) -> Dict[str, Any]:

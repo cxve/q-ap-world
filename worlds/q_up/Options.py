@@ -22,7 +22,10 @@ class Goal(Choice):
     """
     Choose which rank must be reached in order to goal.
 
-    Novice: Reach the end of the game with the champ. Recommended: 12 fixed skills, 35 skills total.
+    Novice: Complete the game, which requires 55 rank ups.
+    Fifty: Reach CHEATER 1, which requires 50 rank ups.
+    Anomaly: Reach Act 2, which requires 35 rank ups.
+    Master: Reach Master 1, which requires 25 rank ups.
     """
     display_name = "Goal Condition"
     option_novice = 55
