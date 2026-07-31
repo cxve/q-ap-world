@@ -46,8 +46,8 @@ class GoalAutoBalance(DefaultOnToggle):
 
     Adjustments are based on your selected goal, here are examples:
     - Fifty: Reduce the numbers by ~10%
-    - Anomaly:
-    - Master:
+    - Anomaly: Reduce the numbers by ~33%
+    - Master: Reduce the numbers by ~50%
     """
     display_name = "Automatically Adjust Goal Balancing"
 
