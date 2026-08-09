@@ -54,6 +54,7 @@ class QUPrules:
             "TURBO_SPEED": self.has_shop_reqs(prereq_rank=20),
             "EXTREMELY_COOL_SHOPS_SOMETIMES": self.has_shop_reqs("SHOP_REROLL", 35),
             "MORE_BETTERED_CHALLENGES": self.has_shop_reqs("EXTREMELY_COOL_SHOPS_SOMETIMES"),
+            "ITEM_RECYCLING_SYSTEM": self.has_shop_reqs("ITEM_SHOP"),
             "ENHANCED_ITEM_RECYCLING__SORTING": self.has_shop_reqs("ITEM_RECYCLING_SYSTEM"),
             "SHOP_LOCK": self.has_shop_reqs("ADDITIONAL_SHOP_SLOT_1"),
             "ADDITIONAL_CHALLENGE_SLOT_1": self.has_shop_reqs("CHALLENGES", 25),
