@@ -2,7 +2,7 @@ from math import floor, ceil
 from typing import Any, Dict
 
 from BaseClasses import Item, Tutorial, Region, ItemClassification
-from Options import OptionGroup
+from Options import OptionGroup, OptionError
 from worlds.AutoWorld import World, WebWorld
 from .Data import skill_names, skill_names_flat, signature_skill_names, signature_skill_names_flat, champ, \
     upgradable_skill_names_flat, features, skill_cat_to_idx, tagged_skills, special_require_any, tag_to_skill, \
@@ -73,6 +73,38 @@ class QUPworld(World):
     progressive_crystal_number = 0
     item_name_groups = item_name_groups
     items_added = 0
+
+    def generate_early(self):
+        # make sure player YAML does not require more items than it has locations
+        num_challenges = self.options.sanityNumChallenges.value
+        num_locations = len(self.all_locations) + num_challenges
+
+        efficiency_upgrade_points = self.options.itemPoolEfficiencyUpgradePoints.value
+        efficiency_crystals = self.options.itemPoolEfficiencyCrystals.value
+
+        num_upgrade_points = ceil(self.options.itemPoolSkillUpgradeNum.value / efficiency_upgrade_points)
+        num_crystals = ceil(self.options.itemPoolProgressiveCrystalsNum.value / efficiency_crystals)
+        num_hypernodes = self.options.itemPoolHypernodeNum.value
+        num_total_skills = self.options.itemPoolTotalSkillNum.value
+        num_feature_items = sum([feat["count"] if feat["classification"] != ItemClassification.filler else 0\
+                                 for feat in feature_items])
+        num_buffer = 3 # this is specifically to avoid fill errors caused by restrictive starts
+
+        sum_items = num_hypernodes + num_total_skills + num_feature_items + num_buffer
+        sum_items_suggestion = num_upgrade_points + num_crystals
+        sum_locations = num_challenges + num_locations
+        if sum_items + sum_items_suggestion > sum_locations:
+            while efficiency_upgrade_points < 4 or efficiency_crystals < 4:
+                if efficiency_upgrade_points <= efficiency_crystals: efficiency_upgrade_points += 1
+                else: efficiency_crystals += 1
+                num_upgrade_points = ceil(self.options.itemPoolSkillUpgradeNum.value / efficiency_upgrade_points)
+                num_crystals = ceil(self.options.itemPoolProgressiveCrystalsNum.value / efficiency_crystals)
+                sum_items_suggestion = num_upgrade_points + num_crystals
+                if sum_items + sum_items_suggestion < sum_locations:
+                    raise OptionError(f"Your YAML generates too many progression items!\n"
+                                      f"Here is a suggested fix: In your YAML file, please set Upgrade Point "
+                                      f"Efficiency to at least {efficiency_upgrade_points} and Crystal Efficiency to "
+                                      f"at least {efficiency_crystals}!")
 
     def get_filler_item_name(self) -> str:
         return self.random.choice(filler_items)["name"]
