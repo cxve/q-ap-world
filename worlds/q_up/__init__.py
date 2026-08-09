@@ -102,11 +102,9 @@ class QUPworld(World):
         my_flex_skills = list(my_flex_skills) + list(signature_skill_names[champ_key])
         my_flex_skills = set(my_flex_skills) - set(upgradable_skill_names_flat)
         my_flex_skills = list(my_flex_skills)
-        self.random.shuffle(my_flex_skills)
 
         pool_fixed = set(upgradable_skill_names_flat) - set(signature_skill_names_flat)
         pool_fixed = list(pool_fixed) + list(set(upgradable_skill_names_flat) & set(signature_skill_names[champ_key]))
-        self.random.shuffle(pool_fixed)
 
         dist_mode = self.options.skillDistMode
 
@@ -154,9 +152,9 @@ class QUPworld(World):
             for i in range(len(tags)): tags[i] = _tags[i]
             skills.extend(set(skills) ^ set(_skills))
 
-            skills.extend(set(skills) ^ set(_skills) ^ {skill})
-
-        def skill_add_from_pool(skills, tags, pool, num):
+        def skill_add_from_pool(skills, tags, _pool, num):
+            pool = _pool.copy()
+            self.random.shuffle(pool)
             num_start = len(skills)
             for i in range(len(pool)):
                 skill_add(skills, tags, pool[i])
@@ -217,7 +215,6 @@ class QUPworld(World):
 
             # create skill pools
             pool_signature = signature_skill_names[champ_key].copy()
-            self.random.shuffle(pool_signature)
 
             other_skills = my_flex_skills.copy()
             pool_tags = []
@@ -229,7 +226,6 @@ class QUPworld(World):
                         if skill in other_skills: other_skills.remove(skill)
                 pool_tags.append(_skills)
             pool_tags.append(other_skills)
-            for pool in pool_tags: self.random.shuffle(pool)
 
             # fill the skill slots
             skills = []
@@ -241,7 +237,6 @@ class QUPworld(World):
                 skill_add_from_pool(skills, tags, pool_tags[i], num_skill_cat[i] - tags[i])
 
             pool_unused = list(set(my_flex_skills) ^ set(skills))
-            self.random.shuffle(pool_unused)
             skill_add_from_pool(skills, tags, pool_unused, num_total_skills - len(skills))
         else:
             skills = []
@@ -249,7 +244,6 @@ class QUPworld(World):
             skill_add_from_pool(skills, [], my_flex_skills, num_total_skills - len(skills))
 
         def create_items(pool):
-            self.random.shuffle(pool)
             for i in range(len(pool)):
                 new_item = self.create_item(pool[i])
                 self.multiworld.itempool.append(new_item)
