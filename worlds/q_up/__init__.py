@@ -123,6 +123,20 @@ class QUPworld(World):
 
             _skills = skills.copy()
             _tags = tags.copy()
+
+            # if this skill tag category is full, skip
+            if dist_mode > 0:
+                skill_tags = tagged_skills[skill]
+                if len(skill_tags) > 0 and skill_tags[0] in skill_cat_to_idx:
+                    tag = skill_cat_to_idx[skill_tags[0]]
+                else:
+                    tag = 5
+                if _tags[tag] >= num_skill_cat[tag]: return
+                _tags[tag] += 1
+
+            # assume this skill is going to be added
+            _skills.append(skill)
+
             # check tag dependencies
             if skill in special_require_any and len(set(skills) & set(tag_to_skill[special_require_any[skill]])) < 1:
                 skill_add_from_pool(_skills, _tags, tag_to_skill[special_require_any[skill]], 1)
@@ -134,19 +148,11 @@ class QUPworld(World):
             if skill in special_require_specific and special_require_specific[skill] not in _skills:
                 skill_add(_skills, _tags, special_require_specific[skill])
                 # was not able to add this skill, skip!
-                if len(_skills) is num_skill_current:
-                    return
+                if len(_skills) is num_skill_current: return
 
-            # if this skill tag category is full, skip
-            if dist_mode > 0:
-                skill_tags = tagged_skills[skill]
-                if len(skill_tags) > 0 and skill_tags[0] in skill_cat_to_idx:
-                    tag = skill_cat_to_idx[skill_tags[0]]
-                else:
-                    tag = 5
-                if _tags[tag] >= num_skill_cat[tag]: return
-                for i in range(len(tags)): tags[i] = _tags[i]
-                tags[tag] += 1
+            # all checks passed, add skill!
+            for i in range(len(tags)): tags[i] = _tags[i]
+            skills.extend(set(skills) ^ set(_skills))
 
             skills.extend(set(skills) ^ set(_skills) ^ {skill})
 
