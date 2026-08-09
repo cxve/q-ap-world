@@ -102,15 +102,18 @@ class QUPworld(World):
         my_flex_skills = list(my_flex_skills) + list(signature_skill_names[champ_key])
         my_flex_skills = set(my_flex_skills) - set(upgradable_skill_names_flat)
         my_flex_skills = list(my_flex_skills)
+        my_flex_skills.sort()
 
         pool_fixed = set(upgradable_skill_names_flat) - set(signature_skill_names_flat)
         pool_fixed = list(pool_fixed) + list(set(upgradable_skill_names_flat) & set(signature_skill_names[champ_key]))
+        pool_fixed.sort()
 
         dist_mode = self.options.skillDistMode
 
         # list of all valid skills for this champ
         my_skills = set(skill_names_flat) - set(signature_skill_names_flat)
         my_skills = list(my_skills) + list(signature_skill_names[champ_key])
+        my_skills.sort()
 
         def skill_add(skills, tags, skill):
             # if skill is invalid for this champ, skip
@@ -158,7 +161,8 @@ class QUPworld(World):
             num_start = len(skills)
             for i in range(len(pool)):
                 skill_add(skills, tags, pool[i])
-                if len(skills) - num_start >= num: return
+                if len(skills) - num_start >= num: break
+            skills.sort()
 
         if dist_mode > 0:
             dist = [
