@@ -110,6 +110,10 @@ class QUPworld(World):
 
         dist_mode = self.options.skillDistMode
 
+        # list of all valid skills for this champ
+        my_skills = set(skill_names_flat) - set(signature_skill_names_flat)
+        my_skills = list(my_skills) + list(signature_skill_names[champ_key])
+
         def skill_add(skills, tags, skill):
             # if skill is invalid for this champ, skip
             if skill not in my_skills: return
@@ -220,10 +224,6 @@ class QUPworld(World):
                 pool_tags.append(_skills)
             pool_tags.append(other_skills)
             for pool in pool_tags: self.random.shuffle(pool)
-
-            # list of all valid skills for this champ
-            my_skills = set(skill_names_flat) - set(signature_skill_names_flat)
-            my_skills = list(my_skills) + list(signature_skill_names[champ_key])
 
             # fill the skill slots
             skills = []
