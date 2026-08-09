@@ -226,7 +226,7 @@ class SanityNumChallenges(Range):
     """
     display_name = "Amount of Challenge Locations"
     range_start = 0
-    range_end = 30
+    range_end = 27
     default = 10
 
 class SanityNumChallengesTier4(Range):
@@ -237,7 +237,7 @@ class SanityNumChallengesTier4(Range):
     """
     display_name = "Maximum amount of Tier 4 Challenges"
     range_start = 0
-    range_end = 6
+    range_end = 5
     default = 1
 
 @dataclass
