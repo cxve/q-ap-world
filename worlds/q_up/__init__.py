@@ -290,13 +290,6 @@ class QUPworld(World):
         self.random.shuffle(_hypernodes)
         create_items(_hypernodes[:num_hypernodes])
 
-        # just add shop items to the pool
-        for item in feature_items:
-            for _ in range(item["count"]):
-                new_item = self.create_item(item["name"])
-                self.multiworld.itempool.append(new_item)
-                self.items_added += 1
-
         _generic_items = generic_items.copy()
         _generic_items[0]["count"] = ceil(num_upgrade_points / efficiency_upgrade_points)
         _generic_items[1]["count"] = ceil(num_crystals / efficiency_crystals)
@@ -304,6 +297,22 @@ class QUPworld(World):
         # add generic items to the pool
         for item in _generic_items:
             for _ in range(item["count"]):
+                new_item = self.create_item(item["name"])
+                self.multiworld.itempool.append(new_item)
+                self.items_added += 1
+
+        # just add shop items to the pool
+        for item in [item for item in feature_items if item["classification"] != ItemClassification.filler]:
+            for _ in range(item["count"]):
+                new_item = self.create_item(item["name"])
+                self.multiworld.itempool.append(new_item)
+                self.items_added += 1
+
+        feature_filler = [item for item in feature_items if item["classification"] == ItemClassification.filler]
+        self.random.shuffle(feature_filler)
+        for item in feature_filler:
+            for _ in range(item["count"]):
+                if self.items_added >= len(self.all_locations) + num_challenges: break
                 new_item = self.create_item(item["name"])
                 self.multiworld.itempool.append(new_item)
                 self.items_added += 1
