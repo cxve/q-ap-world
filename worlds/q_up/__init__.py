@@ -140,7 +140,7 @@ class QUPworld(World):
         pool_fixed = list(pool_fixed) + list(set(upgradable_skill_names_flat) & set(signature_skill_names[champ_key]))
         pool_fixed.sort()
 
-        dist_mode = self.options.skillDistMode
+        dist_mode = self.options.skillDistMode.value
 
         # list of all valid skills for this champ
         my_skills = set(skill_names_flat) - set(signature_skill_names_flat)
@@ -273,6 +273,7 @@ class QUPworld(World):
                 skill_add_from_pool(skills, tags, pool_tags[i], num_skill_cat[i] - tags[i])
 
             pool_unused = list(set(my_flex_skills) ^ set(skills))
+            pool_unused.sort()
             skill_add_from_pool(skills, tags, pool_unused, num_total_skills - len(skills))
         else:
             skills = []
@@ -285,7 +286,7 @@ class QUPworld(World):
                 self.multiworld.itempool.append(new_item)
                 self.items_added += 1
 
-        create_items(list(set(skills)))
+        create_items(skills)
         _hypernodes = hypernode_names.copy()
         self.random.shuffle(_hypernodes)
         create_items(_hypernodes[:num_hypernodes])
