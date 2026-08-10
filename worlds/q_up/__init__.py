@@ -362,4 +362,4 @@ class QUPworld(World):
                                     "itemPoolEfficiencyCrystals",
                                     "itemPoolEfficiencyUpgradePoints",
                                     "sanityNumChallenges",
-                                    "sanityNumChallengesTier4") | { "version": "2.0.0" }
+                                    "sanityNumChallengesTier4") | { "version": "2.0.1" }
