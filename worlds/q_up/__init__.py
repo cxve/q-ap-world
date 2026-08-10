@@ -77,7 +77,7 @@ class QUPworld(World):
     def generate_early(self):
         # make sure player YAML does not require more items than it has locations
         num_challenges = self.options.sanityNumChallenges.value
-        num_locations = len(self.all_locations) + num_challenges
+        sum_locations = len(self.all_locations) + num_challenges
 
         efficiency_upgrade_points = self.options.itemPoolEfficiencyUpgradePoints.value
         efficiency_crystals = self.options.itemPoolEfficiencyCrystals.value
@@ -92,7 +92,6 @@ class QUPworld(World):
 
         sum_items = num_hypernodes + num_total_skills + num_feature_items + num_buffer
         sum_items_suggestion = num_upgrade_points + num_crystals
-        sum_locations = num_challenges + num_locations
         if sum_items + sum_items_suggestion > sum_locations:
             while efficiency_upgrade_points < 4 or efficiency_crystals < 4:
                 if efficiency_upgrade_points <= efficiency_crystals: efficiency_upgrade_points += 1
