@@ -64,7 +64,7 @@ class QUPworld(World):
     game = "Q-UP"
     web = QUPweb()
     options_dataclass = QUPoptions
-    options = QUPoptions
+    options: QUPoptions
     all_items = all_items
     item_name_to_id = {item["name"]: i + base_id for i, item in enumerate(all_items)}
     all_locations = all_locations
