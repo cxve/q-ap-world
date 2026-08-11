@@ -3,7 +3,7 @@ from dataclasses import field
 from BaseClasses import Item, ItemClassification
 from typing import TypedDict, List
 
-from worlds.q_up import hypernode_names
+from worlds.q_up import hypernode_names, skill_names_flat
 from worlds.q_up.Data import skill_names, upgradable_skill_names, signature_skill_names, features
 
 # apparently, can be any number greater than 0
@@ -94,6 +94,7 @@ feature_items: List[ItemDict] = [
 all_items = skills + hypernodes + filler_items + generic_items + feature_items
 
 item_name_groups = ({
-    "Skills": skill_names,
-    "Shop Upgrades": features
+    "Skill": skill_names_flat,
+    "Feature": [feat["name"] for feat in feature_items],
+    "Hypernode": hypernode_names
 })
