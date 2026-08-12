@@ -88,7 +88,7 @@ class QUPworld(World):
         num_total_skills = self.options.itemPoolTotalSkillNum.value
         num_feature_items = sum([feat["count"] if feat["classification"] != ItemClassification.filler else 0\
                                  for feat in feature_items])
-        num_buffer = 3 # this is specifically to avoid fill errors caused by restrictive starts
+        num_buffer = 4 # this is specifically to avoid fill errors and timeouts caused by restrictive starts
 
         sum_items = num_hypernodes + num_total_skills + num_feature_items + num_buffer
         sum_items_suggestion = num_upgrade_points + num_crystals
