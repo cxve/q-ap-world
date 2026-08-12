@@ -13,7 +13,7 @@ ranks = ["Silver", "Gold", "Platinum", "Diamond", "Master", "Grandmaster", "Anom
          "Exploiter", "CHEATER"]
 
 rank_locations = ["Bronze 2", "Bronze 3", "Bronze 4", "Bronze 5"] + [rank + " " + str(i + 1) for rank in ranks for i in
-                                                                     range(5)]
+                                                                     range(5)] + ["Novice"]
 
 rank_location_ids = {location: i + base_id for i, location in enumerate(rank_locations)}
 

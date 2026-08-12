@@ -72,7 +72,7 @@ class QUPworld(World):
     origin_region_name = "Game"
     progressive_crystal_number = 0
     item_name_groups = item_name_groups
-    items_added = 0
+    items_added = 1 # one location always has the victory condition as item!
 
     def generate_early(self):
         # make sure player YAML does not require more items than it has locations
@@ -330,7 +330,7 @@ class QUPworld(World):
         self.multiworld.regions.append(Region("Game", self.player, self.multiworld))
         region = self.get_region("Game")
         _rank_location_ids = rank_location_ids.copy()
-        if goal_rank < 55: _rank_location_ids[rank_locations[goal_rank - 1]] = None
+        _rank_location_ids[rank_locations[goal_rank - 1]] = None
         region.add_locations({ location: _rank_location_ids[location] for location in rank_locations })
         region.add_locations({ location: level_location_ids[location] for location in level_locations })
         region.add_locations({ location: feature_location_ids[location] for location in features })
@@ -344,7 +344,6 @@ class QUPworld(World):
         for i in range(len(challenges)):
             if challenges[i] < 1: continue
             region.add_locations(build_challenge_location_ids(i + 1, challenges[i]))
-        region.locations.append(QUPlocation(self.player,"Novice",None, region))
 
     def create_event(self, event: str) -> QUPitem:
         # while we are at it, we can also add a helper to create events
@@ -353,7 +352,7 @@ class QUPworld(World):
     def set_rules(self) -> None:
         Rules.QUPrules(self).set_all_rules()
         goal_rank = self.options.goal.value
-        goal_rank_name = rank_locations[goal_rank - 1] if goal_rank < 55 else "Novice"
+        goal_rank_name = rank_locations[goal_rank - 1]
         self.multiworld.get_location(goal_rank_name, self.player).place_locked_item(self.create_event("Victory"))
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 

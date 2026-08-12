@@ -62,8 +62,7 @@ class QUPrules:
             "NEW_BUSINESS_MODEL": self.has_shop_reqs(prereq_rank=10),
             "STATS_": self.has_shop_reqs(prereq_rank=5),
             "STATS_CHARTS": self.has_shop_reqs("STATS_", 9),
-            "LOADOUTS": self.has_shop_reqs(prereq_rank=20),
-            "Novice": self.has_difficulty_requirements_rank(55)
+            "LOADOUTS": self.has_shop_reqs(prereq_rank=20)
         }
         for i in range(len(rank_locations)):
             self.location_rules[rank_locations[i]] = self.has_difficulty_requirements_rank(i)
