@@ -140,6 +140,7 @@ class QUPworld(World):
         pool_fixed.sort()
 
         dist_mode = self.options.skillDistMode.value
+        dist_gates = self.options.skillDistGates.value
 
         # list of all valid skills for this champ
         my_skills = set(skill_names_flat) - set(signature_skill_names_flat)
@@ -157,7 +158,7 @@ class QUPworld(World):
             _tags = tags.copy()
 
             # if this skill tag category is full, skip
-            if dist_mode > 0:
+            if dist_gates >= 0:
                 skill_tags = tagged_skills[skill]
                 if len(skill_tags) > 0 and skill_tags[0] in skill_cat_to_idx:
                     tag = skill_cat_to_idx[skill_tags[0]]
@@ -195,7 +196,7 @@ class QUPworld(World):
                 if len(skills) - num_start >= num: break
             skills.sort()
 
-        if dist_mode > 0:
+        if dist_gates >= 0:
             dist = [
                 self.options.skillDistQFlat.value,
                 self.options.skillDistQMult.value,

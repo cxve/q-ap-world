@@ -127,16 +127,31 @@ class ItemPoolEfficiencyUpgradePoints(Range):
     range_end = 4
     default = 2
 
+class SkillDistGates(Choice):
+    """
+    Decide when the randomizer will enforce skill type distribution settings.
+    By default, the randomizer will make sure your in-logic inventory will match
+    the distribution settings once every 10 levels. Lower values result in more
+    linear progression while higher values cause a more unpredictable distribution.
+
+    "Never" means skill type distribution will be entirely random and the settings below will be ignored.
+    """
+    display_name = "Number of Skill Distribution Gates"
+    option_never = -1
+    option_after_50_levels = 50
+    option_every_25_levels = 25
+    option_every_10_levels = 10
+    option_every_5_levels = 5
+    default = 10
+
 class SkillDistMode(Choice):
     """
     Choose how the generator should distribute skills of certain types.
 
-    Disabled: Skill type distribution will be entirely random and the settings below will be ignored.
     Approx: The amount of each skill type will be roughly as you defined below.
     Exact: You will receive exactly the distribution to defined below.
     """
     display_name = "Skill Distribution Mode"
-    option_disabled = 0
     option_approx = 1
     option_exact = 2
     default = 1
@@ -255,6 +270,7 @@ class QUPoptions(PerGameCommonOptions):
     #itemPoolEfficiencyCorruptionShards: ItemPoolEfficiencyCorruptionShards
     itemPoolEfficiencyUpgradePoints: ItemPoolEfficiencyUpgradePoints
 
+    skillDistGates: SkillDistGates
     skillDistMode: SkillDistMode
     skillDistQFlat: SkillDistQFlat
     skillDistQMult: SkillDistQMult
