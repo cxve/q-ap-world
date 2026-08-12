@@ -100,6 +100,7 @@ class QUPrules:
     def has_difficulty_requirements_level(self, level: int) -> Callable[[CollectionState], bool]:
         def temp(state: CollectionState) -> bool:
             if level < 2: return True
+            if level < 20 and state.has("PROGRESSIVE_CHALLENGES", self.player): return True
             if level > 9 and not state.has("ITEM_SHOP", self.player): return False
             return (state.count_from_list_unique(skill_names_flat, self.player) >=
                     self.calculate_skill_requirement_level(level + 2))
