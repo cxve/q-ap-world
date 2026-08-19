@@ -1,7 +1,7 @@
 from math import floor, ceil
 from typing import Any, Dict
 
-from BaseClasses import Item, Tutorial, Region, ItemClassification
+from BaseClasses import Item, Tutorial, Region, ItemClassification, CollectionState
 from Options import OptionGroup, OptionError
 from worlds.AutoWorld import World, WebWorld
 from .Data import skill_names, skill_names_flat, signature_skill_names, signature_skill_names_flat, champ, \
@@ -13,6 +13,7 @@ from .Locations import all_locations, QUPlocation, rank_location_ids, rank_locat
     level_locations, feature_location_ids, build_challenge_location_ids, all_location_ids
 from .Options import QUPoptions
 from .Rules import QUPrules
+from .Logic import QUPstate
 
 class QUPweb(WebWorld):
     theme = "partyTime"
@@ -73,6 +74,16 @@ class QUPworld(World):
     progressive_crystal_number = 0
     item_name_groups = item_name_groups
     items_added = 1 # one location always has the victory condition as item!
+
+    def collect(self, state: CollectionState, item: Item) -> bool:
+        change = super().collect(state, item)
+        if change and item.name in skill_names_flat: state.qup_skill_num[self.player] += 1
+        return change
+
+    def remove(self, state: CollectionState, item: Item) -> bool:
+        change = super().remove(state, item)
+        if change and item.name in skill_names_flat: state.qup_skill_num[self.player] -= 1
+        return change
 
     def generate_early(self):
         # make sure player YAML does not require more items than it has locations
