@@ -375,4 +375,4 @@ class QUPworld(World):
                                     "sanityNumChallenges",
                                     "sanityNumChallengesTier4",
                                     "itemPoolProgressiveCrystalsNum",
-                                    "itemPoolTotalSkillNum") | { "version": "3.0.0" }
+                                    "itemPoolTotalSkillNum") | { "version": self.world_version.as_simple_string() }
