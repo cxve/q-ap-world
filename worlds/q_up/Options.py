@@ -319,8 +319,10 @@ option_groups = [
             ItemPoolFixedSkillNum,
             ItemPoolSkillUpgradeNum,
             ItemPoolCrystalNum,
+            ItemPoolCorruptionShardNum,
             ItemPoolEfficiencyUpgradePoints,
-            ItemPoolEfficiencyCrystals
+            ItemPoolEfficiencyCrystals,
+            ItemPoolEfficiencyCorruptionShards
         ]),
         OptionGroup("Item Distribution", [
             SkillDistMode,
