@@ -3,8 +3,7 @@ from dataclasses import field
 from BaseClasses import Item, ItemClassification
 from typing import TypedDict, List
 
-from worlds.q_up import hypernode_names, skill_names_flat, tag_to_skill
-from worlds.q_up.Data import skill_names, upgradable_skill_names, signature_skill_names, features
+from .Data import hypernode_names, skill_names_flat, tag_to_skill, skill_names, upgradable_skill_names, signature_skill_names
 
 # apparently, can be any number greater than 0
 base_id = 1_000_000
@@ -18,20 +17,19 @@ class ItemDict(TypedDict):
     count: int
     classification: ItemClassification
 
+def get_ids(items: List[ItemDict], offset: int): return {item["name"]: i + offset + base_id for i, item in enumerate(items)}
+
 generic_items: List[ItemDict] = [
     {
         "name": "Upgrade Point",
         "count": 35,
-        "classification": ItemClassification.progression
+        "classification": ItemClassification.progression_deprioritized
     },
     {
         "name": "Crystals",
         "count": 1,
-        "classification": ItemClassification.progression
-    }
-]
-
-filler_items: List[ItemDict] = [
+        "classification": ItemClassification.progression_deprioritized
+    },
     {
         "name": "Gold",
         "count": 1,
@@ -45,9 +43,11 @@ filler_items: List[ItemDict] = [
     {
         "name": "Crystals",
         "count": 1,
-        "classification": ItemClassification.progression
+        "classification": ItemClassification.progression_deprioritized
     }
 ]
+filler_items = ["Crystals", "Gold", "Corruption Shards", "Crystals"]
+generic_item_ids = get_ids(generic_items, 1000 + 200)
 
 def build(x): 
     return [{"name": name, "count": 1, "classification": ItemClassification.progression | ItemClassification.useful, 
@@ -59,9 +59,7 @@ skills: List[ItemDict] = build(skill_names)
 # list of all upgradable skills
 upgradable_skills: List[ItemDict] = build(upgradable_skill_names)
 
-# list of all hypernode_names
-hypernodes: List[ItemDict] = [{"name": name, "count": 1, "classification": ItemClassification.progression |
-                                ItemClassification.useful} for name in hypernode_names]
+skill_ids = get_ids(skills, 0)
 
 # list of all signature skills
 signature_skills: List[ItemDict] = build(signature_skill_names)
@@ -69,6 +67,12 @@ signature_skills: List[ItemDict] = build(signature_skill_names)
 # this list is to
 categorized_signature_skills = [[{"name": name, "count": 1, "classification": ItemClassification.progression} for
                                  name in signature_skill_names[cat]] for cat in signature_skill_names]
+
+# list of all hypernode_names
+hypernodes: List[ItemDict] = [{"name": name, "count": 1, "classification": ItemClassification.progression |
+                                ItemClassification.useful} for name in hypernode_names]
+
+hypernode_ids = get_ids(hypernodes, 1000 + 100)
 
 feature_items: List[ItemDict] = [
     {"name": "GAME_STORE", "count": 0, "classification": ItemClassification.filler},
@@ -91,7 +95,13 @@ feature_items: List[ItemDict] = [
     {"name": "LOADOUTS", "count": 0, "classification": ItemClassification.filler},
     {"name": "PROGRESSIVE_SHOP_REROLL", "count": 2, "classification": ItemClassification.useful}]
 
-all_items = skills + hypernodes + filler_items + generic_items + feature_items
+feature_ids = get_ids(feature_items, 1000)
+
+all_items = skills + feature_items + hypernodes + generic_items
+
+all_item_ids =  {**skill_ids, **feature_ids, **hypernode_ids, **generic_item_ids}
+
+all_items_with_keys = {item["name"]: item for item in all_items}
 
 item_name_groups: dict[str, set[str]] = {
     "Skill": set(skill_names_flat),

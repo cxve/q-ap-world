@@ -7,8 +7,7 @@ from worlds.AutoWorld import World, WebWorld
 from .Data import skill_names, skill_names_flat, signature_skill_names, signature_skill_names_flat, champ, \
     upgradable_skill_names_flat, features, skill_cat_to_idx, tagged_skills, special_require_any, tag_to_skill, \
     special_require_specific, hypernode_names
-from .Items import base_id, QUPitem, filler_items, all_items, signature_skills, upgradable_skills, generic_items, \
-    ItemDict, categorized_signature_skills, feature_items, item_name_groups
+from .Items import base_id, QUPitem, all_item_ids, all_items_with_keys, generic_items, ItemDict, feature_items, item_name_groups, filler_items
 from .Locations import all_locations, QUPlocation, rank_location_ids, rank_locations, level_location_ids, \
     level_locations, feature_location_ids, build_challenge_location_ids, all_location_ids
 from .Options import QUPoptions, option_groups
@@ -43,8 +42,8 @@ class QUPworld(World):
     web = QUPweb()
     options_dataclass = QUPoptions
     options: QUPoptions
-    all_items = all_items
-    item_name_to_id = {item["name"]: i + base_id for i, item in enumerate(all_items)}
+    all_items = all_items_with_keys
+    item_name_to_id = all_item_ids
     all_locations = all_locations
     location_name_to_id = all_location_ids
     origin_region_name = "Game"
@@ -94,11 +93,11 @@ class QUPworld(World):
                                       f"at least {efficiency_crystals}!")
 
     def get_filler_item_name(self) -> str:
-        return self.random.choice(filler_items)["name"]
+        return self.random.choice(filler_items)
 
     def create_item(self, name: str) -> Item:
         item_id = self.item_name_to_id[name]
-        item_data = self.all_items[item_id - base_id]
+        item_data = self.all_items[name]
         return QUPitem(name, item_data["classification"], item_id, self.player)
 
     def create_items(self) -> None:
@@ -310,8 +309,7 @@ class QUPworld(World):
         filler_count = filler_count if filler_count > 0 else 0
         for i in range(filler_count):
             index = i % len(filler_items)
-            filler_item = filler_items[index]
-            new_item = self.create_item(filler_item["name"])
+            new_item = self.create_item(filler_items[index])
             self.multiworld.itempool.append(new_item)
 
     def create_regions(self) -> None:
