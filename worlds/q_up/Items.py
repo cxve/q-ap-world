@@ -31,19 +31,14 @@ generic_items: List[ItemDict] = [
         "classification": ItemClassification.progression_deprioritized
     },
     {
-        "name": "Gold",
-        "count": 1,
-        "classification": ItemClassification.filler
-    },
-    {
         "name": "Corruption Shards",
         "count": 1,
         "classification": ItemClassification.progression_deprioritized
     },
     {
-        "name": "Crystals",
-        "count": 1,
-        "classification": ItemClassification.progression_deprioritized
+        "name": "Gold",
+        "count": 0,
+        "classification": ItemClassification.filler
     }
 ]
 filler_items = ["Crystals", "Gold", "Corruption Shards", "Crystals"]
