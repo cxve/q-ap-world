@@ -108,6 +108,7 @@ class QUPworld(World):
     def create_items(self) -> None:
         num_upgrade_points = self.options.itemPoolSkillUpgradeNum.value
         num_crystals = self.options.itemPoolCrystalNum.value
+        num_corruption_shards = self.options.itemPoolCorruptionShardNum.value
         num_fixed_skills = self.options.itemPoolFixedSkillNum.value
         num_total_skills = self.options.itemPoolTotalSkillNum.value
         num_fixed_skills = num_fixed_skills if num_fixed_skills < num_total_skills else num_total_skills
@@ -117,6 +118,7 @@ class QUPworld(World):
 
         efficiency_upgrade_points = self.options.itemPoolEfficiencyUpgradePoints.value
         efficiency_crystals = self.options.itemPoolEfficiencyCrystals.value
+        efficiency_corruption_shards = self.options.itemPoolEfficiencyCorruptionShards.value
 
         champ_id = self.options.champ.value
         champ_key = champ[champ_id]
@@ -286,6 +288,7 @@ class QUPworld(World):
         _generic_items = generic_items.copy()
         _generic_items[0]["count"] = ceil(num_upgrade_points / efficiency_upgrade_points)
         _generic_items[1]["count"] = ceil(num_crystals / efficiency_crystals)
+        _generic_items[2]["count"] = ceil(num_corruption_shards / efficiency_corruption_shards)
 
         # add generic items to the pool
         for item in _generic_items:
