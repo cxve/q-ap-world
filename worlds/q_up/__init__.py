@@ -2,7 +2,7 @@ from math import floor, ceil
 from typing import Any, Dict
 
 from BaseClasses import Item, Tutorial, Region, ItemClassification, CollectionState
-from Options import OptionGroup, OptionError
+from Options import OptionError
 from worlds.AutoWorld import World, WebWorld
 from .Data import skill_names, skill_names_flat, signature_skill_names, signature_skill_names_flat, champ, \
     upgradable_skill_names_flat, features, skill_cat_to_idx, tagged_skills, special_require_any, tag_to_skill, \
@@ -11,37 +11,14 @@ from .Items import base_id, QUPitem, filler_items, all_items, signature_skills, 
     ItemDict, categorized_signature_skills, feature_items, item_name_groups
 from .Locations import all_locations, QUPlocation, rank_location_ids, rank_locations, level_location_ids, \
     level_locations, feature_location_ids, build_challenge_location_ids, all_location_ids
-from .Options import QUPoptions
+from .Options import QUPoptions, option_groups
 from .Rules import QUPrules
 from .Logic import QUPstate
 
 class QUPweb(WebWorld):
     theme = "partyTime"
 
-    option_groups = [
-        OptionGroup("Item Pool", [
-            Options.ItemPoolTotalSkillNum,
-            Options.ItemPoolFixedSkillNum,
-            Options.ItemPoolSkillUpgradeNum,
-            Options.ItemPoolProgressiveCrystalsNum,
-            Options.ItemPoolEfficiencyUpgradePoints,
-            Options.ItemPoolEfficiencyCrystals
-        ]),
-        OptionGroup("Item Distribution", [
-            Options.SkillDistMode,
-            Options.SkillDistSignature,
-            Options.SkillDistQFlat,
-            Options.SkillDistQMult,
-            Options.SkillDistTrigger,
-            Options.SkillDistGold,
-            Options.SkillDistXP,
-            Options.SkillDistOther
-        ]),
-        OptionGroup("Sanity", [
-           Options.SanityNumChallenges,
-            Options.SanityNumChallengesTier4,
-        ])
-    ]
+    option_groups = option_groups
 
     guide_en = Tutorial(
         "Multiworld Setup Guide",
@@ -94,7 +71,7 @@ class QUPworld(World):
         efficiency_crystals = self.options.itemPoolEfficiencyCrystals.value
 
         num_upgrade_points = ceil(self.options.itemPoolSkillUpgradeNum.value / efficiency_upgrade_points)
-        num_crystals = ceil(self.options.itemPoolProgressiveCrystalsNum.value / efficiency_crystals)
+        num_crystals = ceil(self.options.itemPoolCrystalNum.value / efficiency_crystals)
         num_hypernodes = self.options.itemPoolHypernodeNum.value
         num_total_skills = self.options.itemPoolTotalSkillNum.value
         num_feature_items = sum([feat["count"] if feat["classification"] != ItemClassification.filler else 0\
@@ -108,7 +85,7 @@ class QUPworld(World):
                 if efficiency_upgrade_points <= efficiency_crystals: efficiency_upgrade_points += 1
                 else: efficiency_crystals += 1
                 num_upgrade_points = ceil(self.options.itemPoolSkillUpgradeNum.value / efficiency_upgrade_points)
-                num_crystals = ceil(self.options.itemPoolProgressiveCrystalsNum.value / efficiency_crystals)
+                num_crystals = ceil(self.options.itemPoolCrystalNum.value / efficiency_crystals)
                 sum_items_suggestion = num_upgrade_points + num_crystals
                 if sum_items + sum_items_suggestion < sum_locations:
                     raise OptionError(f"Your YAML generates too many progression items!\n"
@@ -126,7 +103,7 @@ class QUPworld(World):
 
     def create_items(self) -> None:
         num_upgrade_points = self.options.itemPoolSkillUpgradeNum.value
-        num_crystals = self.options.itemPoolProgressiveCrystalsNum.value
+        num_crystals = self.options.itemPoolCrystalNum.value
         num_fixed_skills = self.options.itemPoolFixedSkillNum.value
         num_total_skills = self.options.itemPoolTotalSkillNum.value
         num_fixed_skills = num_fixed_skills if num_fixed_skills < num_total_skills else num_total_skills
@@ -362,7 +339,7 @@ class QUPworld(World):
         return QUPitem(event, ItemClassification.progression, None, self.player)
 
     def set_rules(self) -> None:
-        Rules.QUPrules(self).set_all_rules()
+        QUPrules(self).set_all_rules()
         goal_rank = self.options.goal.value
         goal_rank_name = rank_locations[goal_rank - 1]
         self.multiworld.get_location(goal_rank_name, self.player).place_locked_item(self.create_event("Victory"))
@@ -374,5 +351,6 @@ class QUPworld(World):
                                     "itemPoolEfficiencyUpgradePoints",
                                     "sanityNumChallenges",
                                     "sanityNumChallengesTier4",
-                                    "itemPoolProgressiveCrystalsNum",
+                                    "itemPoolCrystalNum",
+                                    "itemPoolCorruptionShardNum",
                                     "itemPoolTotalSkillNum") | { "version": self.world_version.as_simple_string() }

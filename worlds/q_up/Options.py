@@ -1,3 +1,4 @@
+from Options import OptionGroup
 from dataclasses import dataclass
 
 from Options import Choice, Range, DefaultOnToggle, PerGameCommonOptions
@@ -85,7 +86,7 @@ class ItemPoolHypernodeNum(Range):
     range_end = 8
     default = 3
 
-class ItemPoolProgressiveCrystalsNum(Range):
+class ItemPoolCrystalNum(Range):
     """
     Crystals are usually a major part of the game's progression,
     but they also take up a high number of possible locations.
@@ -109,6 +110,34 @@ class ItemPoolEfficiencyCrystals(Range):
     To avoid fill errors, it is recommended to set this to at least 2.
     """
     display_name = "Crystal Item Efficiency"
+    range_start = 1
+    range_end = 4
+    default = 2
+
+class ItemPoolCorruptionShardNum(Range):
+    """
+    Corruption Shards are part of the game's act 2 progression,
+    but they also take up a high number of possible locations.
+
+    Here you can set a minimum amount of Corruption Shards to be included
+    in the item pool. Corruption Shards can still appear as filler item,
+    regardless of this setting.
+    """
+    display_name = "Minimum amount of Corruption Shards to include"
+    range_start = 0
+    range_end = 30
+    default = 19
+
+class ItemPoolEfficiencyCorruptionShards(Range):
+    """
+    This setting increases the amount of Corruption Shards you receive at once.
+    In turn, it reduces the amount of Corruption Shard drops in the item pool.
+    For example, when set to 2, it will give twice as many shards at
+    once and reduce the number of shards in the item pool by half (1/2).
+
+    To avoid fill errors, it is recommended to set this to at least 2.
+    """
+    display_name = "Corruption Shard Item Efficiency"
     range_start = 1
     range_end = 4
     default = 2
@@ -264,10 +293,10 @@ class QUPoptions(PerGameCommonOptions):
     itemPoolHypernodeNum: ItemPoolHypernodeNum
 
     itemPoolSkillUpgradeNum: ItemPoolSkillUpgradeNum
-    #itemPoolCorruptionShardNum: ItemPoolCorruptionShardNum
-    itemPoolProgressiveCrystalsNum: ItemPoolProgressiveCrystalsNum
+    itemPoolCorruptionShardNum: ItemPoolCorruptionShardNum
+    itemPoolCrystalNum: ItemPoolCrystalNum
     itemPoolEfficiencyCrystals: ItemPoolEfficiencyCrystals
-    #itemPoolEfficiencyCorruptionShards: ItemPoolEfficiencyCorruptionShards
+    itemPoolEfficiencyCorruptionShards: ItemPoolEfficiencyCorruptionShards
     itemPoolEfficiencyUpgradePoints: ItemPoolEfficiencyUpgradePoints
 
     skillDistGates: SkillDistGates
@@ -283,3 +312,28 @@ class QUPoptions(PerGameCommonOptions):
     sanityNumChallenges: SanityNumChallenges
     sanityNumChallengesTier4: SanityNumChallengesTier4
     goal: Goal
+
+option_groups = [
+        OptionGroup("Item Pool", [
+            ItemPoolTotalSkillNum,
+            ItemPoolFixedSkillNum,
+            ItemPoolSkillUpgradeNum,
+            ItemPoolCrystalNum,
+            ItemPoolEfficiencyUpgradePoints,
+            ItemPoolEfficiencyCrystals
+        ]),
+        OptionGroup("Item Distribution", [
+            SkillDistMode,
+            SkillDistSignature,
+            SkillDistQFlat,
+            SkillDistQMult,
+            SkillDistTrigger,
+            SkillDistGold,
+            SkillDistXP,
+            SkillDistOther
+        ]),
+        OptionGroup("Sanity", [
+           SanityNumChallenges,
+           SanityNumChallengesTier4,
+        ])
+    ]

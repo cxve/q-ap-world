@@ -1,3 +1,5 @@
+from typing import NotRequired
+from typing import TypedDict
 import functools, operator
 
 # full list of all skill names
@@ -54,7 +56,7 @@ skill_names = {"gambler": ["Action Junky", "Raise the Stakes", "Multi-Table", "L
                           "Fermat's Little Theorem", "Virtual Particle", "∂Ρ/∂T + ∇·(Ρv) = 0", "D/Dx(E^X) = E^X",
                           "∇²Φ = 0", "Communicator"]}
 
-skill_names_flat = functools.reduce(operator.iconcat, [skill_names[key] for key in skill_names], [])
+skill_names_flat = set(functools.reduce(operator.iconcat, [skill_names[key] for key in skill_names], []))
 
 # "signature" skills are skills that rely on a character's signature gimmick to work
 # for example: skills that require the gambler's tiltmeter
@@ -376,6 +378,87 @@ shopreqs = {
             "ADDITIONAL_CHALLENGE_SLOT_2": "ADDITIONAL_CHALLENGE_SLOT_1",
             "STATS_CHARTS": "STATS_"
         }
+
+class ShopDict(TypedDict):
+    cost: int
+    children: NotRequired[list[str]]
+    corrupted: NotRequired[bool]
+    rank: NotRequired[int]
+
+shop_data: dict[str, ShopDict] = {
+    "GAME_STORE": { "cost": 1, "children": ["ITEM_SHOP", "INCREASED_WALLET_SIZE", "CHALLENGES"] },
+    "ITEM_SHOP": { "cost": 2, "children": ["ITEM_RECYCLING_SYSTEM", "ADDITIONAL_ITEM_SLOT_1", "INCREASED_SHARD_SLOT_CAPACITY", "ADDITIONAL_SHOP_SLOT_1"] },
+    "INCREASED_WALLET_SIZE": { "cost": 20, "children": ["EVEN_BIGGER_WALLET"] },
+    "EVEN_BIGGER_WALLET": { "cost": 60, "children": ["JUMBO_WALLET"] },
+    "JUMBO_WALLET": { "cost": 120, "children": ["FULLBODY_WALLET_SUIT"] },
+    "FULLBODY_WALLET_SUIT": { "cost": 200, "children": ["WORLDS_BIGGEST_WALLET"] },
+    "WORLDS_BIGGEST_WALLET": { "cost": 400, "children": ["TRICKLE_DOWN_"] },
+    "ITEM_RECYCLING_SYSTEM": { "cost": 5, "children": ["ENHANCED_ITEM_RECYCLING__SORTING"] },
+    "CHALLENGES": { "cost": 35, "rank": 10, "children": ["ADDITIONAL_CHALLENGE_SLOT_1"] },
+    "ADDITIONAL_ITEM_SLOT_1": { "cost": 30, "children": ["ADDITIONAL_ITEM_SLOT_2"] },
+    "ADDITIONAL_ITEM_SLOT_2": { "cost": 100, "children": ["ADDITIONAL_ITEM_SLOT_3"] },
+    "ADDITIONAL_ITEM_SLOT_3": { "cost": 250,  "children": ["ADDITIONAL_ITEM_SLOT_4"] },
+    "ADDITIONAL_ITEM_SLOT_4": { "cost": 1000 },
+    "INCREASED_SHARD_SLOT_CAPACITY": { "cost": 100, "children": ["MAXIMUM_SHARD_SLOT_CAPACITY"], "rank": 10 },
+    "MAXIMUM_SHARD_SLOT_CAPACITY": { "cost": 500, "rank": 10 },
+    "HONOR_DUELS": { "cost": 80, "rank": 25 },
+    "ADDITIONAL_SHOP_SLOT_1": { "cost": 50, "children": ["ADDITIONAL_SHOP_SLOT_2", "SHOP_LOCK"], "rank": 5 },
+    "ADDITIONAL_SHOP_SLOT_2": { "cost": 100, "children": ["ADDITIONAL_SHOP_SLOT_3"], "rank": 5 },
+    "ADDITIONAL_SHOP_SLOT_3": { "cost": 200, "children": ["ADDITIONAL_SHOP_SLOT_4", "SHOP_REROLL"], "rank": 5 },
+    "ADDITIONAL_SHOP_SLOT_4": { "cost": 350, "children": ["ADDITIONAL_SHOP_SLOT_5"], "rank": 5 },
+    "ADDITIONAL_SHOP_SLOT_5": { "cost": 500 },
+    "QBLOCK_BREAKER_1": { "cost": 2, "children": ["QBLOCK_BREAKER_2"], "rank": 35, "corrupted": True },
+    "QBLOCK_BREAKER_2": { "cost": 5, "children": ["QBLOCK_BREAKER_3"], "rank": 35, "corrupted": True },
+    "QBLOCK_BREAKER_3": { "cost": 11, "children": ["QBLOCK_BREAKER_4"], "rank": 35, "corrupted": True },
+    "QBLOCK_BREAKER_4": { "cost": 17, "children": ["QBLOCK_BREAKER_5"], "rank": 35, "corrupted": True },
+    "QBLOCK_BREAKER_5": { "cost": 26, "children": ["QBLOCK_BREAKER_6"], "rank": 35, "corrupted": True },
+    "QBLOCK_BREAKER_6": { "cost": 29, "children": ["QBLOCK_BREAKER_7"], "rank": 35, "corrupted": True },
+    "QBLOCK_BREAKER_7": { "cost": 32, "children": ["QBLOCK_BREAKER_8"], "rank": 35, "corrupted": True },
+    "QBLOCK_BREAKER_8": { "cost": 39, "children": ["QBLOCK_BREAKER_9"], "rank": 35, "corrupted": True },
+    "QBLOCK_BREAKER_9": { "cost": 45, "rank": 35, "corrupted": True },
+    "TRICKLE_DOWN_": { "cost": 500 },
+    "KNOWLEDGE_TRANSFER": { "cost": 500, "rank": 40 },
+    "SHOP_REROLL": { "cost": 500, "children": ["EXTREMELY_COOL_SHOPS_SOMETIMES"], "rank": 5 },
+    "TURBO_SPEED": { "cost": 30, "rank": 20 },
+    "EXTREMELY_COOL_SHOPS_SOMETIMES": { "cost": 5, "children": ["MORE_BETTERED_CHALLENGES"], "rank": 35, "corrupted": True },
+    "MORE_BETTERED_CHALLENGES": { "cost": 5, "rank": 35, "corrupted": True },
+    "ENHANCED_ITEM_RECYCLING__SORTING": { "cost": 25 },
+    "SHOP_LOCK": { "cost": 50, "rank": 5 },
+    "ADDITIONAL_CHALLENGE_SLOT_1": { "cost": 300, "children": ["ADDITIONAL_CHALLENGE_SLOT_2"], "rank": 25 },
+    "ADDITIONAL_CHALLENGE_SLOT_2": { "cost": 550, "rank": 25 },
+    # the price is actually -30, but that would break my linear progression calculation
+    # the 30 bonus crystals will be taken into account in Rules.py
+    "NEW_BUSINESS_MODEL": { "cost": 0, "rank": 10 },
+    "STATS_": { "cost": 5, "children": ["STATS_CHARTS"], "rank": 5 },
+    "STATS_CHARTS": { "cost": 2, "rank": 9 },
+    "LOADOUTS": { "cost": 25, "rank": 20 }
+}
+
+shop_roots = ["GAME_STORE", "HONOR_DUELS", "QBLOCK_BREAKER_1", "KNOWLEDGE_TRANSFER", "TURBO_SPEED", "NEW_BUSINESS_MODEL", "STATS_", "LOADOUTS"]
+
+shop_costs = {}
+_shop_roots = shop_roots.copy()
+_cost = 0
+_cost_corrupted = 0
+while len(_shop_roots) > 0:
+    m = "", 9999
+    for k in _shop_roots:
+        if shop_data[k]["cost"] < m[1]: m = k, shop_data[k]["cost"]
+    if not "corrupted" in shop_data[k]: 
+        _cost += m[1]
+        shop_costs[m[0]] = _cost
+    else: 
+        _cost_corrupted += m[1]
+        shop_costs[m[0]] = _cost_corrupted
+    if "children" in shop_data[m[0]]:
+        _shop_roots.extend(shop_data[m[0]]["children"])
+    _shop_roots.remove(m[0])
+
+crystal_rewards = [2, 6, 8, 10, 15, 8, 9, 10, 11, 25, 13, 15, 17, 19, 50, 20, 22, 24, 26, 85, 30, 32, 34, 36, 120, 40, 43, 46, 49, 150, 60, 62, 65, 70, 250]
+
+mail_crystal_rewards = [10, 10, 20, 20, 30, 30, 40, 40, 50, 50]
+
+corruption_shard_rewards = [5, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 7, 10, 10, 10, 10, 10]
 
 tagged_skills = {
     # Luke, the Gambler

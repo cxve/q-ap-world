@@ -1,7 +1,7 @@
+from .Data import corruption_shard_rewards, mail_crystal_rewards, crystal_rewards, shop_costs, shop_data
 from math import ceil
 from typing import Dict, Callable, TYPE_CHECKING
 from BaseClasses import CollectionState
-from .Data import skill_names_flat, shopreqs
 from .Locations import rank_locations, level_locations
 
 if TYPE_CHECKING:
@@ -18,52 +18,9 @@ class QUPrules:
     def __init__(self, world: QUPworld) -> None:
         self.player = world.player
         self.world = world
-        self.location_rules = {
-            "GAME_STORE": self.has_crystals,
-            "ITEM_SHOP": self.has_shop_req("GAME_STORE"),
-            "INCREASED_WALLET_SIZE": self.has_shop_req("GAME_STORE"),
-            "EVEN_BIGGER_WALLET": self.has_shop_req("INCREASED_WALLET_SIZE"),
-            "JUMBO_WALLET": self.has_shop_req("EVEN_BIGGER_WALLET"),
-            "FULLBODY_WALLET_SUIT": self.has_shop_req("JUMBO_WALLET"),
-            "WORLDS_BIGGEST_WALLET": self.has_shop_req("FULLBODY_WALLET_SUIT"),
-            "CHALLENGES": self.has_shop_req("GAME_STORE", 10),
-            "ADDITIONAL_ITEM_SLOT_1": self.has_shop_req("ITEM_SHOP", 5),
-            "ADDITIONAL_ITEM_SLOT_2": self.has_shop_req("ADDITIONAL_ITEM_SLOT_1"),
-            "ADDITIONAL_ITEM_SLOT_3": self.has_shop_req("ADDITIONAL_ITEM_SLOT_2"),
-            "ADDITIONAL_ITEM_SLOT_4": self.has_shop_req("ADDITIONAL_ITEM_SLOT_3"),
-            "INCREASED_SHARD_SLOT_CAPACITY": self.has_shop_req("ITEM_SHOP", 10),
-            "MAXIMUM_SHARD_SLOT_CAPACITY": self.has_shop_req("INCREASED_SHARD_SLOT_CAPACITY"),
-            "HONOR_DUELS": self.has_shop_req(prereq_rank=25),
-            "ADDITIONAL_SHOP_SLOT_1": self.has_shop_req("ITEM_SHOP", 5),
-            "ADDITIONAL_SHOP_SLOT_2": self.has_shop_req("ADDITIONAL_SHOP_SLOT_1"),
-            "ADDITIONAL_SHOP_SLOT_3": self.has_shop_req("ADDITIONAL_SHOP_SLOT_2"),
-            "ADDITIONAL_SHOP_SLOT_4": self.has_shop_req("ADDITIONAL_SHOP_SLOT_3"),
-            "ADDITIONAL_SHOP_SLOT_5": self.has_shop_req("ADDITIONAL_SHOP_SLOT_4"),
-            "QBLOCK_BREAKER_1": self.has_shop_req(prereq_rank=35),
-            "QBLOCK_BREAKER_2": self.has_shop_req("QBLOCK_BREAKER_1"),
-            "QBLOCK_BREAKER_3": self.has_shop_req("QBLOCK_BREAKER_2"),
-            "QBLOCK_BREAKER_4": self.has_shop_req("QBLOCK_BREAKER_3"),
-            "QBLOCK_BREAKER_5": self.has_shop_req("QBLOCK_BREAKER_4"),
-            "QBLOCK_BREAKER_6": self.has_shop_req("QBLOCK_BREAKER_5"),
-            "QBLOCK_BREAKER_7": self.has_shop_req("QBLOCK_BREAKER_6"),
-            "QBLOCK_BREAKER_8": self.has_shop_req("QBLOCK_BREAKER_7"),
-            "QBLOCK_BREAKER_9": self.has_shop_req("QBLOCK_BREAKER_8"),
-            "TRICKLE_DOWN_": self.has_shop_req("WORLDS_BIGGEST_WALLET"),
-            "KNOWLEDGE_TRANSFER": self.has_shop_req(prereq_rank=40),
-            "SHOP_REROLL": self.has_shop_req("ADDITIONAL_SHOP_SLOT_3"),
-            "TURBO_SPEED": self.has_shop_req(prereq_rank=20),
-            "EXTREMELY_COOL_SHOPS_SOMETIMES": self.has_shop_req("SHOP_REROLL", 35),
-            "MORE_BETTERED_CHALLENGES": self.has_shop_req("EXTREMELY_COOL_SHOPS_SOMETIMES"),
-            "ITEM_RECYCLING_SYSTEM": self.has_shop_req("ITEM_SHOP"),
-            "ENHANCED_ITEM_RECYCLING__SORTING": self.has_shop_req("ITEM_RECYCLING_SYSTEM"),
-            "SHOP_LOCK": self.has_shop_req("ADDITIONAL_SHOP_SLOT_1"),
-            "ADDITIONAL_CHALLENGE_SLOT_1": self.has_shop_req("CHALLENGES", 25),
-            "ADDITIONAL_CHALLENGE_SLOT_2": self.has_shop_req("ADDITIONAL_CHALLENGE_SLOT_1"),
-            "NEW_BUSINESS_MODEL": self.has_shop_req(prereq_rank=10),
-            "STATS_": self.has_shop_req(prereq_rank=5),
-            "STATS_CHARTS": self.has_shop_req("STATS_", 9),
-            "LOADOUTS": self.has_shop_req(prereq_rank=20)
-        }
+        self.location_rules = {}
+        for k in shop_data.keys():
+            self.location_rules[k] = self.has_shop_req(k)
         for i in range(len(rank_locations)):
             self.location_rules[rank_locations[i]] = self.has_difficulty_req_rank(i + 1)
         for i in range(len(level_locations)):
@@ -80,22 +37,42 @@ class QUPrules:
     def has_crystals(self, state: CollectionState) -> bool:
         return state.has("Crystals", self.player)
 
-    def has_shop_req(self, location: str = "", prereq_rank: int = -1) -> Callable[[CollectionState], bool]:
+    def has_shop_req(self, location: str) -> Callable[[CollectionState], bool]:
+        data = shop_data[location]
+        req_rank = data["rank"] if "rank" in data else -1
         efficiency_crystals = self.world.options.itemPoolEfficiencyCrystals.value
-        max_progressive_crystals = self.world.options.itemPoolProgressiveCrystalsNum.value
+        efficiency_corruption_shards = self.world.options.itemPoolEfficiencyCorruptionShards.value
+        min_crystals = self.world.options.itemPoolCrystalNum.value
+        min_corruption_shards = self.world.options.itemPoolCorruptionShardNum.value
 
-        def go(loc: str, count: int) -> int:
-            if loc not in shopreqs: return count
-            return go(shopreqs[loc], count + 1)
-        distance = go(location, 0)
+        def crystals(state: CollectionState):
+            has_crystals = True
+            count_crystals = min(state.count("Crystals", self.player) * efficiency_crystals, min_crystals)
+            if count_crystals < min_crystals:
+                crystals = sum(crystal_rewards[0:count_crystals])
+                crystals += max(0, count_crystals - len(crystal_rewards)) * 100
+                crystals += sum(mail_crystal_rewards[0:ceil((count_crystals + 1) / min_crystals * 10)])
+                req_crystals = shop_costs[location]
+                has_crystals = crystals * 2 > req_crystals
+            else: has_crystals = state.has("PROGRESSIVE_ITEM_RECYCLING_SYSTEM", self.player, 2)
+            has_rank = req_rank < 0 or self.has_difficulty_req_rank(req_rank)(state)
+            return has_crystals and has_rank
 
-        def temp(state: CollectionState):
-            reachable = location == "" or state.can_reach_location(location, self.player)
-            crystals = (min(state.count("Crystals", self.player) * efficiency_crystals, max_progressive_crystals) >
-                        distance * 2)
-            rank = prereq_rank < 0 or self.has_difficulty_req_rank(prereq_rank)(state)
-            return reachable and crystals and rank
-        return temp
+        def corruption_shards(state: CollectionState):
+            has_shards = True
+            count_shards = min(state.count("Corruption Shards", self.player) * efficiency_corruption_shards, min_corruption_shards)
+            if count_shards < min_corruption_shards:
+                shards = sum(corruption_shard_rewards[0:count_shards])
+                shards += max(0, count_shards - len(corruption_shard_rewards)) * 10
+                req_shards = shop_costs[location]
+                has_shards = shards * 1.5 > req_shards
+            else: has_shards = state.has("PROGRESSIVE_CHALLENGES", self.player, 2)
+            has_rank = req_rank < 0 or self.has_difficulty_req_rank(req_rank)(state)
+            return has_shards and has_rank
+
+        if not "corrupted" in shop_data[location]: return crystals
+        else: return corruption_shards
+
 
     def has_difficulty_req_level(self, level: int) -> Callable[[CollectionState], bool]:
         if level < 4: return lambda state: True

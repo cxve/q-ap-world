@@ -40,7 +40,7 @@ filler_items: List[ItemDict] = [
     {
         "name": "Corruption Shards",
         "count": 1,
-        "classification": ItemClassification.filler
+        "classification": ItemClassification.progression_deprioritized
     },
     {
         "name": "Crystals",
@@ -49,9 +49,9 @@ filler_items: List[ItemDict] = [
     }
 ]
 
-build = lambda x: [{"name": name, "count": 1, "classification":
-    ItemClassification.progression | ItemClassification.useful, "champ": i} for i, champ in enumerate(x) for name in
-                   x[champ]]
+def build(x): 
+    return [{"name": name, "count": 1, "classification": ItemClassification.progression | ItemClassification.useful, 
+            "champ": i} for i, champ in enumerate(x) for name in x[champ]]
 
 # list of all skills
 skills: List[ItemDict] = build(skill_names)
@@ -71,7 +71,7 @@ categorized_signature_skills = [[{"name": name, "count": 1, "classification": It
                                  name in signature_skill_names[cat]] for cat in signature_skill_names]
 
 feature_items: List[ItemDict] = [
-    {"name": "GAME_STORE", "count": 1, "classification": ItemClassification.filler},
+    {"name": "GAME_STORE", "count": 0, "classification": ItemClassification.filler},
     {"name": "ITEM_SHOP", "count": 1, "classification": ItemClassification.progression | ItemClassification.useful},
     {"name": "PROGRESSIVE_WALLET_SIZE", "count": 5, "classification": ItemClassification.progression},
     {"name": "PROGRESSIVE_ITEM_RECYCLING_SYSTEM", "count": 2, "classification": ItemClassification.progression},
@@ -86,19 +86,19 @@ feature_items: List[ItemDict] = [
     #{"name": "TURBO_SPEED", "count": 1, "classification": ItemClassification.progression}, # unlocked by default
     {"name": "PROGRESSIVE_CHALLENGE_SLOT", "count": 2, "classification": ItemClassification.progression},
     {"name": "SHOP_LOCK", "count": 1, "classification": ItemClassification.useful},
-    {"name": "NEW_BUSINESS_MODEL", "count": 1, "classification": ItemClassification.filler},
+    {"name": "NEW_BUSINESS_MODEL", "count": 0, "classification": ItemClassification.filler},
     {"name": "PROGRESSIVE_STATS", "count": 3, "classification": ItemClassification.filler},
     {"name": "LOADOUTS", "count": 0, "classification": ItemClassification.filler},
     {"name": "PROGRESSIVE_SHOP_REROLL", "count": 2, "classification": ItemClassification.useful}]
 
 all_items = skills + hypernodes + filler_items + generic_items + feature_items
 
-item_name_groups = {
-    "Skill": skill_names_flat,
-    "Trigger Skill": tag_to_skill["trigger"],
-    "Flat Q Skill": tag_to_skill["q_flat"],
-    "Q Mult Skill": tag_to_skill["q_mult"],
+item_name_groups: dict[str, set[str]] = {
+    "Skill": set(skill_names_flat),
+    "Trigger Skill": set(tag_to_skill["trigger"]),
+    "Flat Q Skill": set(tag_to_skill["q_flat"]),
+    "Q Mult Skill": set(tag_to_skill["q_mult"]),
 
-    "Hypernode": hypernode_names,
-    "Feature": [feat["name"] for feat in feature_items]
+    "Hypernode": set(hypernode_names),
+    "Feature": set([feat["name"] for feat in feature_items])
 }
