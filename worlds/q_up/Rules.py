@@ -45,34 +45,47 @@ class QUPrules:
         min_crystals = self.world.options.itemPoolCrystalNum.value
         min_corruption_shards = self.world.options.itemPoolCorruptionShardNum.value
 
-        def crystals(state: CollectionState):
-            has_crystals = True
-            count_crystals = min(state.count("Crystals", self.player) * efficiency_crystals, min_crystals)
-            if count_crystals < min_crystals:
+        def crystals():
+            def expensive(state: CollectionState):
+                has_crystals = state.has("PROGRESSIVE_ITEM_RECYCLING_SYSTEM", self.player, 2)
+                has_rank = req_rank < 0 or self.has_difficulty_req_rank(req_rank)(state)
+                return has_crystals and has_rank
+            if shop_costs[location] > sum(crystal_rewards[0:min_crystals]) + max(0, min_crystals - len(crystal_rewards)) * 100 + sum(mail_crystal_rewards):
+                return expensive
+            
+            def affordable(state: CollectionState):
+                has_crystals = True
+                count_crystals = min(state.count("Crystals", self.player) * efficiency_crystals, min_crystals)
                 crystals = sum(crystal_rewards[0:count_crystals])
                 crystals += max(0, count_crystals - len(crystal_rewards)) * 100
                 crystals += sum(mail_crystal_rewards[0:ceil((count_crystals + 1) / min_crystals * 10)])
                 req_crystals = shop_costs[location]
                 has_crystals = crystals * 2 > req_crystals
-            else: has_crystals = state.has("PROGRESSIVE_ITEM_RECYCLING_SYSTEM", self.player, 2)
-            has_rank = req_rank < 0 or self.has_difficulty_req_rank(req_rank)(state)
-            return has_crystals and has_rank
+                has_rank = req_rank < 0 or self.has_difficulty_req_rank(req_rank)(state)
+                return has_crystals and has_rank
+            return affordable
 
-        def corruption_shards(state: CollectionState):
-            has_shards = True
-            count_shards = min(state.count("Corruption Shards", self.player) * efficiency_corruption_shards, min_corruption_shards)
-            if count_shards < min_corruption_shards:
+        def corruption_shards():
+            def expensive(state: CollectionState):
+                has_shards = state.has("PROGRESSIVE_CHALLENGES", self.player, 2)
+                has_rank = req_rank < 0 or self.has_difficulty_req_rank(req_rank)(state)
+                return has_shards and has_rank
+            if shop_costs[location] > sum(corruption_shard_rewards[0:min_corruption_shards]) + max(0, min_corruption_shards - len(corruption_shard_rewards) * 10):
+                return expensive
+
+            def affordable(state: CollectionState):
+                has_shards = True
+                count_shards = min(state.count("Corruption Shards", self.player) * efficiency_corruption_shards, min_corruption_shards)
                 shards = sum(corruption_shard_rewards[0:count_shards])
                 shards += max(0, count_shards - len(corruption_shard_rewards)) * 10
                 req_shards = shop_costs[location]
                 has_shards = shards * 1.5 > req_shards
-            else: has_shards = state.has("PROGRESSIVE_CHALLENGES", self.player, 2)
-            has_rank = req_rank < 0 or self.has_difficulty_req_rank(req_rank)(state)
-            return has_shards and has_rank
+                has_rank = req_rank < 0 or self.has_difficulty_req_rank(req_rank)(state)
+                return has_shards and has_rank
+            return affordable
 
-        if not "corrupted" in shop_data[location]: return crystals
-        else: return corruption_shards
-
+        if not "corrupted" in shop_data[location]: return crystals()
+        else: return corruption_shards()
 
     def has_difficulty_req_level(self, level: int) -> Callable[[CollectionState], bool]:
         if level < 4: return lambda state: True
