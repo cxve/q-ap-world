@@ -63,6 +63,8 @@ class QUPworld(World):
 
     def generate_early(self):
         # make sure player YAML does not require more items than it has locations
+        fix_strategy = self.options.fixStrategy.value
+
         num_challenges = self.options.sanityNumChallenges.value
         sum_locations = len(self.all_locations) + num_challenges
 
@@ -91,11 +93,17 @@ class QUPworld(World):
                 num_corruption_shards = ceil(self.options.itemPoolCorruptionShardNum / efficiency_corruption_shards)
                 sum_items_suggestion = num_upgrade_points + num_crystals + num_corruption_shards
                 if sum_items + sum_items_suggestion < sum_locations:
-                    raise OptionError(f"Your YAML generates too many progression items!\n"
-                                      f"Here is a suggested fix: In your YAML file, please set Upgrade Point "
-                                      f"Efficiency to at least {efficiency_upgrade_points}, Crystal Efficiency to "
-                                      f"at least {efficiency_crystals}, and Corruption Shard efficiency to at "
-                                      f"least {efficiency_corruption_shards}!")
+                    if fix_strategy == 0:
+                        raise OptionError(f"Your YAML generates too many progression items!\n"
+                                          f"Here is a suggested fix: In your YAML file, please set Upgrade Point "
+                                          f"Efficiency to at least {efficiency_upgrade_points}, Crystal Efficiency to "
+                                          f"at least {efficiency_crystals}, and Corruption Shard efficiency to at "
+                                          f"least {efficiency_corruption_shards}!")
+                    else: 
+                        self.options.itemPoolEfficiencyUpgradePoints.value = efficiency_upgrade_points
+                        self.options.itemPoolEfficiencyCrystals.value = efficiency_crystals
+                        self.options.itemPoolEfficiencyCorruptionShards.value = efficiency_corruption_shards
+                        break
 
     def get_filler_item_name(self) -> str:
         return self.random.choice(filler_items)

@@ -35,6 +35,21 @@ class Goal(Choice):
     option_master = 25
     default = 55
 
+class AutoFixYAML(Choice):
+    """
+    Choose what the randomizer should do, if your YAML introduces more
+    progression items than locations.
+
+    **Adjust Efficiency** will reduce the number of item drops by increasing
+    the contents of each drop. For example, instead of receiving one upgrade
+    point twice, you receive two upgrade points once. (Recommended!)
+    **Fail Generation** will disable YAML fixing. If your YAML has too many
+    progression items, generating a multiworld is going to always fail.
+    """
+    option_prefer_adjusting_efficiency = 1
+    option_prefer_failing_generation = 0
+    default = 1
+
 class ItemPoolTotalSkillNum(Range):
     """
     Set the maximum amount of skills you want to find in total.
@@ -311,6 +326,7 @@ class QUPoptions(PerGameCommonOptions):
 
     sanityNumChallenges: SanityNumChallenges
     sanityNumChallengesTier4: SanityNumChallengesTier4
+    fixStrategy: AutoFixYAML
     goal: Goal
 
 option_groups = [
