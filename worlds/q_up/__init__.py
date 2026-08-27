@@ -1,12 +1,13 @@
+from typing import Any, Dict, TypedDict
 from math import floor, ceil
-from typing import Any, Dict
+from copy import deepcopy
 
 from BaseClasses import Item, Tutorial, Region, ItemClassification, CollectionState
 from Options import OptionError
 from worlds.AutoWorld import World, WebWorld
 from .Data import skill_names, skill_names_flat, signature_skill_names, signature_skill_names_flat, champ, \
-    upgradable_skill_names_flat, features, skill_cat_to_idx, tagged_skills, special_require_any, tag_to_skill, \
-    special_require_specific, hypernode_names
+    upgradable_skill_names_flat, features, skill_cat_to_idx, special_require_any, tag_to_skill, \
+    special_require_specific, hypernode_names, skill_directory
 from .Items import base_id, QUPitem, all_item_ids, all_items_with_keys, generic_items, ItemDict, feature_items, item_name_groups, filler_items
 from .Locations import all_locations, QUPlocation, rank_location_ids, rank_locations, level_location_ids, \
     level_locations, feature_location_ids, build_challenge_location_ids, all_location_ids
@@ -30,7 +31,7 @@ class QUPweb(WebWorld):
 
     tutorials = [guide_en]
 
-    bug_report_page = "https://github.com/cxve/Q-AP-world"
+    bug_report_page = "https://github.com/cxve/q-ap-world"
 
 
 class QUPworld(World):
@@ -50,15 +51,57 @@ class QUPworld(World):
     progressive_crystal_number = 0
     item_name_groups = item_name_groups
     items_added = 1 # one location always has the victory condition as item!
+    num_skill_cat = [0,0,0,0,0]
 
-    def collect(self, state: CollectionState, item: Item) -> bool:
+    def collect(self, state, item: Item) -> bool:
         change = super().collect(state, item)
-        if change and item.name in skill_names_flat: state.qup_skill_num[self.player] += 1
+        if change:
+            if item.name in skill_names_flat: 
+                # it is a skill
+                state.qup_skill_num[self.player] += 1 # skill +1
+                # try to get skill tag
+                tag = skill_directory[item.name]["tags"][0] if len(skill_directory[item.name]["tags"]) > 0 else ""
+                # if skill triggers automatically
+                if skill_directory[item.name]["trigger"] != "trigger": 
+                    # auto skill +1
+                    state.qup_triggerable_skill_num[self.player] += 1
+                    # if this auto skill can trigger
+                    if tag == "trigger":
+                        state.qup_trigger_skill_num[self.player] += 1 # auto trigger skill +1
+                if tag == "q_flat":
+                    state.qup_dist_q_flat_num[self.player] += 1
+                elif tag == "q_mult":
+                    state.qup_dist_q_mult_num[self.player] += 1
+                elif tag == "trigger":
+                    state.qup_dist_trigger_num[self.player] += 1
+                elif tag == "gold":
+                    state.qup_dist_gold_num[self.player] += 1
+                elif tag == "xp":
+                    state.qup_dist_xp_num[self.player] += 1
+                else: state.qup_dist_other_num[self.player] += 1
         return change
 
-    def remove(self, state: CollectionState, item: Item) -> bool:
+    def remove(self, state, item: Item) -> bool:
         change = super().remove(state, item)
-        if change and item.name in skill_names_flat: state.qup_skill_num[self.player] -= 1
+        if change:
+            if item.name in skill_names_flat: 
+                state.qup_skill_num[self.player] -= 1
+                tag = skill_directory[item.name]["tags"][0] if len(skill_directory[item.name]["tags"]) > 0 else ""
+                if skill_directory[item.name]["trigger"] != "trigger": 
+                    state.qup_triggerable_skill_num[self.player] -= 1
+                    if tag == "trigger":
+                        state.qup_trigger_skill_num[self.player] -= 1
+                if tag == "q_flat":
+                    state.qup_dist_q_flat_num[self.player] -= 1
+                elif tag == "q_mult":
+                    state.qup_dist_q_mult_num[self.player] -= 1
+                elif tag == "trigger":
+                    state.qup_dist_trigger_num[self.player] -= 1
+                elif tag == "gold":
+                    state.qup_dist_gold_num[self.player] -= 1
+                elif tag == "xp":
+                    state.qup_dist_xp_num[self.player] -= 1
+                else: state.qup_dist_other_num[self.player] -= 1
         return change
 
     def generate_early(self):
@@ -141,7 +184,6 @@ class QUPworld(World):
         pool_fixed = list(pool_fixed) + list(set(upgradable_skill_names_flat) & set(signature_skill_names[champ_key]))
         pool_fixed.sort()
 
-        dist_mode = self.options.skillDistMode.value
         dist_gates = self.options.skillDistGates.value
 
         # list of all valid skills for this champ
@@ -149,54 +191,57 @@ class QUPworld(World):
         my_skills = list(my_skills) + list(signature_skill_names[champ_key])
         my_skills.sort()
 
-        def skill_add(skills, tags, skill):
+        class GenData(TypedDict):
+            skills: list[str]
+            tags: list[int]
+
+        def skill_add(gen_data: GenData, skill):
             # if skill is invalid for this champ, skip
             if skill not in my_skills: return
 
             # if skill is already selected, skip
-            if skill in skills: return
+            if skill in gen_data["skills"]: return
 
-            _skills = skills.copy()
-            _tags = tags.copy()
+            _gen_data = deepcopy(gen_data)
 
             # if this skill tag category is full, skip
             if dist_gates >= 0:
-                skill_tags = tagged_skills[skill]
+                skill_tags = skill_directory[skill]["tags"]
                 if len(skill_tags) > 0 and skill_tags[0] in skill_cat_to_idx:
                     tag = skill_cat_to_idx[skill_tags[0]]
                 else:
                     tag = 5
-                if _tags[tag] >= num_skill_cat[tag]: return
-                _tags[tag] += 1
+                if _gen_data["tags"][tag] >= self.num_skill_cat[tag]: return
+                _gen_data["tags"][tag] += 1
 
             # assume this skill is going to be added
-            _skills.append(skill)
+            _gen_data["skills"].append(skill)
 
             # check tag dependencies
-            if skill in special_require_any and len(set(skills) & set(tag_to_skill[special_require_any[skill]])) < 1:
-                skill_add_from_pool(_skills, _tags, tag_to_skill[special_require_any[skill]], 1)
+            if skill in special_require_any and len(set(gen_data["skills"]) & set(tag_to_skill[special_require_any[skill]])) < 1:
+                skill_add_from_pool(_gen_data, tag_to_skill[special_require_any[skill]], 1)
                 # was not able to add this skill, skip!
-                if len(_skills) is len(skills): return
+                if len(_gen_data["skills"]) is len(gen_data["skills"]): return
 
-            num_skill_current = len(_skills)
+            num_skill_current = len(_gen_data["skills"])
             # check specific dependencies
-            if skill in special_require_specific and special_require_specific[skill] not in _skills:
-                skill_add(_skills, _tags, special_require_specific[skill])
+            if skill in special_require_specific and special_require_specific[skill] not in _gen_data["skills"]:
+                skill_add(_gen_data, special_require_specific[skill])
                 # was not able to add this skill, skip!
-                if len(_skills) is num_skill_current: return
+                if len(_gen_data["skills"]) is num_skill_current: return
 
             # all checks passed, add skill!
-            for i in range(len(tags)): tags[i] = _tags[i]
-            skills.extend(set(skills) ^ set(_skills))
+            for i in range(len(gen_data["tags"])): gen_data["tags"][i] = _gen_data["tags"][i]
+            gen_data["skills"].extend(set(gen_data["skills"]) ^ set(_gen_data["skills"]))
 
-        def skill_add_from_pool(skills, tags, _pool, num):
+        def skill_add_from_pool(gen_data: GenData, _pool, num):
             pool = _pool.copy()
             self.random.shuffle(pool)
-            num_start = len(skills)
+            num_start = len(gen_data["skills"])
             for i in range(len(pool)):
-                skill_add(skills, tags, pool[i])
-                if len(skills) - num_start >= num: break
-            skills.sort()
+                skill_add(gen_data, pool[i])
+                if len(gen_data["skills"]) - num_start >= num: break
+            gen_data["skills"].sort()
 
         if dist_gates >= 0:
             dist = [
@@ -208,15 +253,6 @@ class QUPworld(World):
                 self.options.skillDistOther.value,
             ]
             dist_signature = self.options.skillDistSignature.value
-
-            # apply approx mode
-            if dist_mode == 1:
-                if dist_signature > 6: dist_signature += self.random.choice([-3, 0, 3])
-                for i in range(len(dist)):
-                    x = dist[i]
-                    if x > 1:
-                        x += self.random.choice([-1, 0, 1])
-                        dist[i] = x
 
             num_signature = ceil(dist_signature / 100 * num_total_skills)
 
@@ -245,11 +281,11 @@ class QUPworld(World):
                 if num > 1: dist_skill_exact[i] = d * (num_total_skills - dist_skill_total)
 
             # then split remainder
-            num_skill_cat = [floor(d) for d in dist_skill_exact]
-            remainder = num_total_skills - sum(num_skill_cat)
+            self.num_skill_cat = [floor(d) for d in dist_skill_exact]
+            remainder = num_total_skills - sum(self.num_skill_cat)
             fractions = [(d % 1, i) for i, d in enumerate(dist_skill_exact)]
             fractions.sort(reverse=True)
-            for i in range(remainder): num_skill_cat[fractions[i][1]] += 1
+            for i in range(remainder): self.num_skill_cat[fractions[i][1]] += 1
 
             # create skill pools
             pool_signature = signature_skill_names[champ_key].copy()
@@ -266,21 +302,26 @@ class QUPworld(World):
             pool_tags.append(other_skills)
 
             # fill the skill slots
-            skills = []
-            tags = [0, 0, 0, 0, 0, 0]
+            gen_data: GenData = {
+                "skills": [],
+                "tags": [0, 0, 0, 0, 0, 0]
+            }
 
-            skill_add_from_pool(skills, tags, pool_fixed, num_fixed_skills)
-            skill_add_from_pool(skills, tags, pool_signature, num_signature)
+            skill_add_from_pool(gen_data, pool_fixed, num_fixed_skills)
+            skill_add_from_pool(gen_data, pool_signature, num_signature)
             for i in range(6):
-                skill_add_from_pool(skills, tags, pool_tags[i], num_skill_cat[i] - tags[i])
+                skill_add_from_pool(gen_data, pool_tags[i], self.num_skill_cat[i] - gen_data["tags"][i])
 
-            pool_unused = list(set(my_flex_skills) ^ set(skills))
+            pool_unused = list(set(my_flex_skills) ^ set(gen_data["skills"]))
             pool_unused.sort()
-            skill_add_from_pool(skills, tags, pool_unused, num_total_skills - len(skills))
+            skill_add_from_pool(gen_data, pool_unused, num_total_skills - len(gen_data["skills"]))
         else:
-            skills = []
-            skill_add_from_pool(skills, [], pool_fixed, num_fixed_skills)
-            skill_add_from_pool(skills, [], my_flex_skills, num_total_skills - len(skills))
+            gen_data: GenData = {
+                "skills": [],
+                "tags": []
+            }
+            skill_add_from_pool(gen_data, pool_fixed, num_fixed_skills)
+            skill_add_from_pool(gen_data, my_flex_skills, num_total_skills - len(gen_data["skills"]))
 
         def create_items(pool):
             for i in range(len(pool)):
@@ -288,7 +329,7 @@ class QUPworld(World):
                 self.multiworld.itempool.append(new_item)
                 self.items_added += 1
 
-        create_items(skills)
+        create_items(gen_data["skills"])
         _hypernodes = hypernode_names.copy()
         self.random.shuffle(_hypernodes)
         create_items(_hypernodes[:num_hypernodes])
@@ -361,8 +402,9 @@ class QUPworld(World):
 
     def fill_slot_data(self) -> Dict[str, Any]:
         return self.options.as_dict("champ", "goal",
-                                    "itemPoolEfficiencyCrystals",
                                     "itemPoolEfficiencyUpgradePoints",
+                                    "itemPoolEfficiencyCrystals",
+                                    "itemPoolEfficiencyCorruptionShards",
                                     "sanityNumChallenges",
                                     "sanityNumChallengesTier4",
                                     "itemPoolCrystalNum",

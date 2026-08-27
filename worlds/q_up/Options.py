@@ -182,23 +182,11 @@ class SkillDistGates(Choice):
     """
     display_name = "Number of Skill Distribution Gates"
     option_never = -1
-    option_after_50_levels = 50
-    option_every_25_levels = 25
-    option_every_10_levels = 10
-    option_every_5_levels = 5
-    default = 10
-
-class SkillDistMode(Choice):
-    """
-    Choose how the generator should distribute skills of certain types.
-
-    Approx: The amount of each skill type will be roughly as you defined below.
-    Exact: You will receive exactly the distribution to defined below.
-    """
-    display_name = "Skill Distribution Mode"
-    option_approx = 1
-    option_exact = 2
-    default = 1
+    option_after_50_levels = 1
+    option_every_25_levels = 2
+    option_every_10_levels = 5
+    option_every_5_levels = 10
+    default = 5
 
 class SkillDistQFlat(Range):
     """
@@ -315,7 +303,6 @@ class QUPoptions(PerGameCommonOptions):
     itemPoolEfficiencyUpgradePoints: ItemPoolEfficiencyUpgradePoints
 
     skillDistGates: SkillDistGates
-    skillDistMode: SkillDistMode
     skillDistQFlat: SkillDistQFlat
     skillDistQMult: SkillDistQMult
     skillDistTrigger: SkillDistTrigger
@@ -341,7 +328,7 @@ option_groups = [
             ItemPoolEfficiencyCorruptionShards
         ]),
         OptionGroup("Item Distribution", [
-            SkillDistMode,
+            SkillDistGates,
             SkillDistSignature,
             SkillDistQFlat,
             SkillDistQMult,

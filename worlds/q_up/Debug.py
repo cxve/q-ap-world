@@ -1,4 +1,4 @@
-from Data import shop_data, shop_costs, mail_crystal_rewards, crystal_rewards, corruption_shard_rewards
+from Data import shop_data, shop_costs, mail_crystal_rewards, crystal_rewards, corruption_shard_rewards, skill_directory, skill_names
 from math import ceil
 
 def calc_req_crystal_num():
@@ -36,4 +36,18 @@ def calc_req_shard_num():
         if not "corrupted" in shop_data[k]: continue
         print([35, k])
         
-calc_req_shard_num()
+#def transform_tagged_skills():
+#    return { key: { "trigger": "", "tags": tagged_skills[key] } for key in tagged_skills }
+
+def get_trigger_ratio():
+    for champ, skills in skill_names.items():
+        num_on_trigger = 0
+        num_auto_trigger = 0
+        for skill in skills:
+            if skill_directory[skill]["trigger"] == "trigger": num_on_trigger += 1
+            elif len(skill_directory[skill]["tags"]) > 0 and skill_directory[skill]["tags"][0] == "trigger":
+                num_auto_trigger += 1
+        print(f"Champ {champ} has {num_on_trigger} on trigger skills and {num_auto_trigger} auto trigger skills.")
+        print(f"    That's {num_on_trigger / num_auto_trigger} on trigger skills for each auto trigger skill!")
+
+get_trigger_ratio()

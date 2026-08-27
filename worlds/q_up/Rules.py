@@ -1,5 +1,5 @@
 from .Data import corruption_shard_rewards, mail_crystal_rewards, crystal_rewards, shop_costs, shop_data
-from math import ceil
+from math import ceil, floor
 from typing import Dict, Callable, TYPE_CHECKING
 from BaseClasses import CollectionState
 from .Locations import rank_locations, level_locations
@@ -37,79 +37,84 @@ class QUPrules:
     def has_crystals(self, state: CollectionState) -> bool:
         return state.has("Crystals", self.player)
 
+    def count_effective_skills(self, state) -> int:
+        if state.qup_trigger_skill_num[self.player] > 0: return state.qup_skill_num[self.player]
+        else: return state.qup_triggerable_skill_num[self.player]
+
     def has_shop_req(self, location: str) -> Callable[[CollectionState], bool]:
         data = shop_data[location]
-        req_rank = data["rank"] if "rank" in data else -1
+        cost = shop_costs[location]
+        num_skills = self.world.options.itemPoolTotalSkillNum.value
+        req_rank = data["rank"] if "rank" in data else min(ceil(cost / 10), num_skills)
         efficiency_crystals = self.world.options.itemPoolEfficiencyCrystals.value
         efficiency_corruption_shards = self.world.options.itemPoolEfficiencyCorruptionShards.value
         min_crystals = self.world.options.itemPoolCrystalNum.value
         min_corruption_shards = self.world.options.itemPoolCorruptionShardNum.value
 
-        def crystals():
-            def expensive(state: CollectionState):
-                has_crystals = state.has("PROGRESSIVE_ITEM_RECYCLING_SYSTEM", self.player, 2)
-                has_rank = req_rank < 0 or self.has_difficulty_req_rank(req_rank)(state)
-                return has_crystals and has_rank
-            if shop_costs[location] > sum(crystal_rewards[0:min_crystals]) + max(0, min_crystals - len(crystal_rewards)) * 100 + sum(mail_crystal_rewards):
-                return expensive
-            
-            def affordable(state: CollectionState):
-                has_crystals = True
-                count_crystals = min(state.count("Crystals", self.player) * efficiency_crystals, min_crystals)
-                crystals = sum(crystal_rewards[0:count_crystals])
-                crystals += max(0, count_crystals - len(crystal_rewards)) * 100
-                crystals += sum(mail_crystal_rewards[0:ceil((count_crystals + 1) / min_crystals * 10)])
-                req_crystals = shop_costs[location]
-                has_crystals = crystals * 2 > req_crystals
-                has_rank = req_rank < 0 or self.has_difficulty_req_rank(req_rank)(state)
-                return has_crystals and has_rank
-            return affordable
+        def crystals(state: CollectionState):      
+            if req_rank > 0 and not self.has_difficulty_req_rank(req_rank)(state): return False
+            count_recycling = state.count("PROGRESSIVE_ITEM_RECYCLING_SYSTEM", self.player)
+            count_crystals = state.count("Crystals", self.player) * efficiency_crystals * (count_recycling + 1)
+            crystals = sum(crystal_rewards[0:count_crystals])
+            crystals += max(0, count_crystals - len(crystal_rewards)) * 100
+            crystals += sum(mail_crystal_rewards[0:ceil((count_crystals + 1) / min_crystals * 10)])
+            has_crystals = crystals >= cost or (count_crystals >= min_crystals and count_recycling == 2)
+            return has_crystals
 
-        def corruption_shards():
-            def expensive(state: CollectionState):
-                has_shards = state.has("PROGRESSIVE_CHALLENGES", self.player, 2)
-                has_rank = req_rank < 0 or self.has_difficulty_req_rank(req_rank)(state)
-                return has_shards and has_rank
-            if shop_costs[location] > sum(corruption_shard_rewards[0:min_corruption_shards]) + max(0, min_corruption_shards - len(corruption_shard_rewards) * 10):
-                return expensive
+        def corruption_shards(state: CollectionState):
+            if req_rank > 0 and not self.has_difficulty_req_rank(req_rank)(state): return False
+            count_challenges = state.count("PROGRESSIVE_CHALLENGES", self.player)
+            count_shards = state.count("Corruption Shards", self.player) * efficiency_corruption_shards * (count_challenges + 1)
+            shards = sum(corruption_shard_rewards[0:count_shards])
+            shards += max(0, count_shards - len(corruption_shard_rewards)) * 10
+            has_shards = shards >= cost or (count_shards >= min_corruption_shards and count_challenges == 2)
+            return has_shards
 
-            def affordable(state: CollectionState):
-                has_shards = True
-                count_shards = min(state.count("Corruption Shards", self.player) * efficiency_corruption_shards, min_corruption_shards)
-                shards = sum(corruption_shard_rewards[0:count_shards])
-                shards += max(0, count_shards - len(corruption_shard_rewards)) * 10
-                req_shards = shop_costs[location]
-                has_shards = shards * 1.5 > req_shards
-                has_rank = req_rank < 0 or self.has_difficulty_req_rank(req_rank)(state)
-                return has_shards and has_rank
-            return affordable
+        if not "corrupted" in data: return crystals
+        else: return corruption_shards
 
-        if not "corrupted" in shop_data[location]: return crystals()
-        else: return corruption_shards()
+    def skill_dist_check(self, num_current, num_max):
+        num_gates = self.world.options.skillDistGates.value
+        if num_gates < 2 or num_current >= num_max: return lambda state: True
+        step = floor(num_current / num_max * num_gates)
+        num_skill_cat = [floor(val / num_gates * step) for val in self.world.num_skill_cat]
+        def check(state):
+            return state.qup_dist_q_flat_num[self.player] >= num_skill_cat[0] and \
+                state.qup_dist_q_mult_num[self.player] >= num_skill_cat[1] and \
+                state.qup_dist_trigger_num[self.player] >= num_skill_cat[2] and \
+                state.qup_dist_gold_num[self.player] >= num_skill_cat[3] and \
+                state.qup_dist_xp_num[self.player] >= num_skill_cat[4] and \
+                state.qup_dist_other_num[self.player] >= num_skill_cat[5]
+        return check
 
     def has_difficulty_req_level(self, level: int) -> Callable[[CollectionState], bool]:
         if level < 4: return lambda state: True
         req_level = self.calc_skill_req_level(level)
-        skill_check = lambda state: state.qup_skill_num[self.player] >= req_level
+        skill_dist_check = self.skill_dist_check(level, 50)
+        skill_check = lambda state: self.count_effective_skills(state) >= req_level and skill_dist_check(state)
         if level <= 11: return skill_check
-        full_skill_check = lambda state: state.has("ITEM_SHOP", self.player) and skill_check(state)
-        if 11 < level < 22: return lambda state: (state.has("PROGRESSIVE_CHALLENGES", self.player) or
-            full_skill_check(state))
-        return full_skill_check
+        skill_check_2 = lambda state: state.has("ITEM_SHOP", self.player) and skill_check(state)
+        skill_check_3 = lambda state: state.has("PROGRESSIVE_CHALLENGES", self.player) and skill_check_2(state)
+        if 11 < level < 15: return lambda state: state.has("PROGRESSIVE_CHALLENGES", self.player) or skill_check_2(state)
+        if 15 <= level < 22: return lambda state: state.has("PROGRESSIVE_CHALLENGES", self.player)
+        return skill_check_3
 
     def has_difficulty_req_rank(self, rank: int) -> Callable[[CollectionState], bool]:
         if rank < 2: return lambda state: True
         req_rank = self.calc_skill_req_rank(rank)
-        skill_check = lambda state: state.qup_skill_num[self.player] >= req_rank
+        skill_dist_check = self.skill_dist_check(rank, 55)
+        skill_check = lambda state: self.count_effective_skills(state) >= req_rank and skill_dist_check(state)
         if rank <= 4: return skill_check
-        full_skill_check = lambda state: state.has("ITEM_SHOP", self.player) and skill_check(state)
+        skill_check_2 = lambda state: state.has("ITEM_SHOP", self.player) and skill_check(state)
+        if rank <= 15: return skill_check_2
+        skill_check_3 = lambda state: state.has("PROGRESSIVE_CHALLENGES", self.player) and skill_check_2(state)
         if rank > 52: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) == 9 and full_skill_check(state))
+                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) == 9 and skill_check_3(state))
         if rank > 48: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 8 and full_skill_check(state))
+                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 8 and skill_check_3(state))
         if rank > 46: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 7 and full_skill_check(state))
-        return full_skill_check
+                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 7 and skill_check_3(state))
+        return skill_check_3
 
     def calc_skill_req_level(self, level: int) -> int:
         return min(round(pow(level, 0.87)*1.16,0), self.world.options.itemPoolTotalSkillNum.value)

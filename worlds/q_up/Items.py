@@ -23,17 +23,17 @@ generic_items: List[ItemDict] = [
     {
         "name": "Upgrade Point",
         "count": 35,
-        "classification": ItemClassification.progression_deprioritized
+        "classification": ItemClassification.progression_deprioritized_skip_balancing
     },
     {
         "name": "Crystals",
         "count": 1,
-        "classification": ItemClassification.progression_deprioritized
+        "classification": ItemClassification.progression_deprioritized_skip_balancing
     },
     {
         "name": "Corruption Shards",
         "count": 1,
-        "classification": ItemClassification.progression_deprioritized
+        "classification": ItemClassification.progression_deprioritized_skip_balancing
     },
     {
         "name": "Gold",
@@ -76,7 +76,7 @@ feature_items: List[ItemDict] = [
     {"name": "PROGRESSIVE_ITEM_RECYCLING_SYSTEM", "count": 2, "classification": ItemClassification.progression},
     {"name": "PROGRESSIVE_CHALLENGES", "count": 2, "classification": ItemClassification.progression},
     {"name": "PROGRESSIVE_ITEM_SLOT", "count": 4, "classification": ItemClassification.progression},
-    {"name": "PROGRESSIVE_SHARD_SLOT_CAPACITY", "count": 2, "classification": ItemClassification.progression},
+    {"name": "PROGRESSIVE_SHARD_SLOT_CAPACITY", "count": 2, "classification": ItemClassification.useful},
     {"name": "HONOR_DUELS", "count": 1, "classification": ItemClassification.useful},
     {"name": "PROGRESSIVE_SHOP_SLOT", "count": 5, "classification": ItemClassification.filler},
     {"name": "PROGRESSIVE_QBLOCK_BREAKER", "count": 9, "classification": ItemClassification.progression},
