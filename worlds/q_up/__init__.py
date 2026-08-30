@@ -250,6 +250,9 @@ class QUPworld(World):
             # assume this skill is going to be added
             _gen_data["skills"].append(skill)
 
+            # if this skill is fixed but we already have all fixed skills, skip
+            if len([skill for skill in _gen_data["skills"] if skill in pool_fixed]) > num_fixed_skills: return
+
             # check tag dependencies
             if skill in special_require_any and len(set(gen_data["skills"]) & set(tag_to_skill[special_require_any[skill]])) < 1:
                 skill_add_from_pool(_gen_data, tag_to_skill[special_require_any[skill]], 1)
