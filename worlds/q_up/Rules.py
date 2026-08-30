@@ -109,7 +109,7 @@ class QUPrules:
         if rank <= 15: return skill_check_2
         skill_check_3 = lambda state: state.has("PROGRESSIVE_CHALLENGES", self.player) and skill_check_2(state)
         if rank > 52: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) == 9 and skill_check_3(state))
+                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 9 and skill_check_3(state))
         if rank > 48: return lambda state: (
                 state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 8 and skill_check_3(state))
         if rank > 46: return lambda state: (
