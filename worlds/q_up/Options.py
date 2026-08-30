@@ -137,11 +137,15 @@ class ItemPoolCorruptionShardNum(Range):
     Here you can set a minimum amount of Corruption Shards to be included
     in the item pool. Corruption Shards can still appear as filler item,
     regardless of this setting.
+
+    The vanilla amount of corruption shard drops is 19, but since
+    corruption shards can also drop as filler items the default
+    amount was decreased to 10.
     """
     display_name = "Minimum amount of Corruption Shards to include"
     range_start = 0
-    range_end = 30
-    default = 19
+    range_end = 20
+    default = 10
 
 class ItemPoolEfficiencyCorruptionShards(Range):
     """
