@@ -23,7 +23,7 @@ generic_items: List[ItemDict] = [
     {
         "name": "Upgrade Point",
         "count": 35,
-        "classification": ItemClassification.progression_deprioritized_skip_balancing
+        "classification": ItemClassification.useful
     },
     {
         "name": "Crystals",
