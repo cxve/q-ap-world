@@ -35,6 +35,16 @@ class Goal(Choice):
     option_master = 25
     default = 55
 
+class RemoveContentAfterGoal(DefaultOnToggle):
+    """
+    Removes items and locations that only become relevant after the goal.
+    This setting will make the randomizer easier. If you want, you can 
+    balance it by slightly reducing the number of items inside the item pool below.
+
+    If you are playing with auto release, this setting should be turned on.
+    """
+    display_name = "Remove Content After Goal?"
+
 class AutoFixYAML(Choice):
     """
     Choose what the randomizer should do, if your YAML introduces more
@@ -319,6 +329,7 @@ class QUPoptions(PerGameCommonOptions):
     sanityNumChallengesTier4: SanityNumChallengesTier4
     fixStrategy: AutoFixYAML
     goal: Goal
+    removeContentAfterGoal: RemoveContentAfterGoal
 
 option_groups = [
         OptionGroup("Item Pool", [

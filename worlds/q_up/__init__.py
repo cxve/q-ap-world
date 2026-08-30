@@ -7,7 +7,7 @@ from Options import OptionError
 from worlds.AutoWorld import World, WebWorld
 from .Data import skill_names, skill_names_flat, signature_skill_names, signature_skill_names_flat, champ, \
     upgradable_skill_names_flat, features, skill_cat_to_idx, special_require_any, tag_to_skill, \
-    special_require_specific, hypernode_names, skill_directory
+    special_require_specific, hypernode_names, skill_directory, shop_data
 from .Items import base_id, QUPitem, all_item_ids, all_items_with_keys, generic_items, ItemDict, feature_items, item_name_groups, filler_items
 from .Locations import all_locations, QUPlocation, rank_location_ids, rank_locations, level_location_ids, \
     level_locations, feature_location_ids, build_challenge_location_ids, all_location_ids
@@ -45,7 +45,7 @@ class QUPworld(World):
     options: QUPoptions
     all_items = all_items_with_keys
     item_name_to_id = all_item_ids
-    all_locations = all_locations
+    all_locations = all_locations.copy()
     location_name_to_id = all_location_ids
     origin_region_name = "Game"
     progressive_crystal_number = 0
@@ -53,6 +53,8 @@ class QUPworld(World):
     items_added = 1 # one location always has the victory condition as item!
     num_skill_cat = [0,0,0,0,0]
     fixed_skill_pos: list[str] = []
+    feature_items = feature_items.copy()
+    generic_items = generic_items.copy()
 
     def collect(self, state, item: Item) -> bool:
         change = super().collect(state, item)
@@ -106,11 +108,8 @@ class QUPworld(World):
         return change
 
     def generate_early(self):
-        # make sure player YAML does not require more items than it has locations
-        fix_strategy = self.options.fixStrategy.value
-
-        num_challenges = self.options.sanityNumChallenges.value
-        sum_locations = len(self.all_locations) + num_challenges
+        # apply remove content after goal option
+        goal = self.options.goal.value
 
         efficiency_upgrade_points = self.options.itemPoolEfficiencyUpgradePoints.value
         efficiency_crystals = self.options.itemPoolEfficiencyCrystals.value
@@ -118,11 +117,38 @@ class QUPworld(World):
 
         num_upgrade_points = ceil(self.options.itemPoolSkillUpgradeNum.value / efficiency_upgrade_points)
         num_crystals = ceil(self.options.itemPoolCrystalNum.value / efficiency_crystals)
+        num_corruption_shards = ceil(self.options.itemPoolCorruptionShardNum.value / efficiency_corruption_shards)
+
+        if self.options.removeContentAfterGoal.value and goal < 55:
+            remove_locations = [ f"CHEATER {i}" for i in range(2, 6)]
+            remove_locations.append("Novice")
+            for k, v in shop_data.items():
+                if "rank" in v and v["rank"] >= goal: remove_locations.append(k)
+            if goal < 50: 
+                remove_locations.append("CHEATER 1")
+                remove_locations.extend([ f"{rank} {i}" for i in range(1,6) for rank in ["Exploiter", "Improbability", "Anomaly"] ])
+                remove_locations.remove("Anomaly 1")
+                for feat in self.feature_items: 
+                    if feat["name"] == "PROGRESSIVE_QBLOCK_BREAKER": feat["count"] = 0
+                    if feat["name"] == "PROGRESSIVE_CHALLENGES": feat["count"] = 1
+                self.options.itemPoolCorruptionShardNum.value = 0
+            if goal < 35:
+                remove_locations.append("Anomaly 1")
+                remove_locations.extend([ f"{rank} {i}" for i in range(1,6) for rank in ["Grandmaster", "Master"] ])
+                remove_locations.remove("Master 1")
+            for loc in remove_locations:
+                self.all_locations.remove(loc)
+
+        # make sure player YAML does not require more items than it has locations
+        fix_strategy = self.options.fixStrategy.value
+
+        num_challenges = self.options.sanityNumChallenges.value
+        sum_locations = len(self.all_locations) + num_challenges
+
         num_hypernodes = self.options.itemPoolHypernodeNum.value
-        num_corruption_shards = ceil(self.options.itemPoolCorruptionShardNum / efficiency_corruption_shards)
         num_total_skills = self.options.itemPoolTotalSkillNum.value
         num_feature_items = sum([feat["count"] if feat["classification"] != ItemClassification.filler else 0\
-                                 for feat in feature_items])
+                                 for feat in self.feature_items])
         num_buffer = 4 # this is specifically to avoid fill errors and timeouts caused by restrictive starts
 
         sum_items = num_hypernodes + num_total_skills + num_feature_items + num_buffer
@@ -134,7 +160,7 @@ class QUPworld(World):
                 else: efficiency_corruption_shards += 1
                 num_upgrade_points = ceil(self.options.itemPoolSkillUpgradeNum.value / efficiency_upgrade_points)
                 num_crystals = ceil(self.options.itemPoolCrystalNum.value / efficiency_crystals)
-                num_corruption_shards = ceil(self.options.itemPoolCorruptionShardNum / efficiency_corruption_shards)
+                num_corruption_shards = ceil(self.options.itemPoolCorruptionShardNum.value / efficiency_corruption_shards)
                 sum_items_suggestion = num_upgrade_points + num_crystals + num_corruption_shards
                 if sum_items + sum_items_suggestion < sum_locations:
                     if fix_strategy == 0:
@@ -144,10 +170,15 @@ class QUPworld(World):
                                           f"at least {efficiency_crystals}, and Corruption Shard efficiency to at "
                                           f"least {efficiency_corruption_shards}!")
                     else: 
-                        self.options.itemPoolEfficiencyUpgradePoints.value = efficiency_upgrade_points
-                        self.options.itemPoolEfficiencyCrystals.value = efficiency_crystals
-                        self.options.itemPoolEfficiencyCorruptionShards.value = efficiency_corruption_shards
+                        num_upgrade_points = ceil(self.options.itemPoolSkillUpgradeNum.value / efficiency_upgrade_points)
+                        num_crystals = ceil(self.options.itemPoolCrystalNum.value / efficiency_crystals)
+                        num_corruption_shards = ceil(self.options.itemPoolCorruptionShardNum.value / efficiency_corruption_shards)
                         break
+
+        self.generic_items = generic_items.copy()
+        self.generic_items[0]["count"] = num_upgrade_points
+        self.generic_items[1]["count"] = num_crystals
+        self.generic_items[2]["count"] = num_corruption_shards
 
     def get_filler_item_name(self) -> str:
         return self.random.choice(filler_items)
@@ -167,10 +198,6 @@ class QUPworld(World):
         num_hypernodes = self.options.itemPoolHypernodeNum.value
 
         num_challenges = self.options.sanityNumChallenges.value
-
-        efficiency_upgrade_points = self.options.itemPoolEfficiencyUpgradePoints.value
-        efficiency_crystals = self.options.itemPoolEfficiencyCrystals.value
-        efficiency_corruption_shards = self.options.itemPoolEfficiencyCorruptionShards.value
 
         champ_id = self.options.champ.value
         champ_key = champ[champ_id]
@@ -335,26 +362,21 @@ class QUPworld(World):
         self.random.shuffle(_hypernodes)
         create_items(_hypernodes[:num_hypernodes])
 
-        _generic_items = generic_items.copy()
-        _generic_items[0]["count"] = ceil(num_upgrade_points / efficiency_upgrade_points)
-        _generic_items[1]["count"] = ceil(num_crystals / efficiency_crystals)
-        _generic_items[2]["count"] = ceil(num_corruption_shards / efficiency_corruption_shards)
-
         # add generic items to the pool
-        for item in _generic_items:
+        for item in self.generic_items:
             for _ in range(item["count"]):
                 new_item = self.create_item(item["name"])
                 self.multiworld.itempool.append(new_item)
                 self.items_added += 1
 
         # just add shop items to the pool
-        for item in [item for item in feature_items if item["classification"] != ItemClassification.filler]:
+        for item in [item for item in self.feature_items if item["classification"] != ItemClassification.filler]:
             for _ in range(item["count"]):
                 new_item = self.create_item(item["name"])
                 self.multiworld.itempool.append(new_item)
                 self.items_added += 1
 
-        feature_filler = [item for item in feature_items if item["classification"] == ItemClassification.filler]
+        feature_filler = [item for item in self.feature_items if item["classification"] == ItemClassification.filler]
         self.random.shuffle(feature_filler)
         for item in feature_filler:
             for _ in range(item["count"]):
@@ -376,9 +398,9 @@ class QUPworld(World):
         region = self.get_region("Game")
         _rank_location_ids = rank_location_ids.copy()
         _rank_location_ids[rank_locations[goal_rank - 1]] = None
-        region.add_locations({ location: _rank_location_ids[location] for location in rank_locations })
+        region.add_locations({ location: _rank_location_ids[location] for location in rank_locations if location in self.all_locations })
         region.add_locations({ location: level_location_ids[location] for location in level_locations })
-        region.add_locations({ location: feature_location_ids[location] for location in features })
+        region.add_locations({ location: feature_location_ids[location] for location in features if location in self.all_locations })
         challenges = [0, 0, 0, 0]
         for i in range(self.options.sanityNumChallenges.value):
             if challenges[3] < self.options.sanityNumChallengesTier4.value and challenges[2] > challenges[3] + 1:
