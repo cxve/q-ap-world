@@ -92,7 +92,7 @@ class QUPrules:
         req_level = self.calc_skill_req_level(level)
         skill_dist_check = self.skill_dist_check(level, 50)
         skill_check = lambda state: self.count_effective_skills(state) >= req_level and skill_dist_check(state)
-        if level <= 11: return skill_check
+        if level <= 11: return lambda state: state.has("PROGRESSIVE_CHALLENGES", self.player) or skill_check(state)
         skill_check_2 = lambda state: state.has("ITEM_SHOP", self.player) and skill_check(state)
         skill_check_3 = lambda state: state.has("PROGRESSIVE_CHALLENGES", self.player) and skill_check_2(state)
         if 11 < level < 15: return lambda state: state.has("PROGRESSIVE_CHALLENGES", self.player) or skill_check_2(state)
