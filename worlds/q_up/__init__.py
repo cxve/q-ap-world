@@ -140,6 +140,7 @@ class QUPworld(World):
                     if feat["name"] == "PROGRESSIVE_QBLOCK_BREAKER": feat["count"] = 0
                     if feat["name"] == "PROGRESSIVE_CHALLENGES": feat["count"] = 1
                 self.options.itemPoolCorruptionShardNum.value = 0
+                self.options.itemPoolHypernodeNum.value = 0
             if goal < 35:
                 remove_locations.append("Anomaly 1")
                 remove_locations.extend([ f"{rank} {i}" for i in range(1,6) for rank in ["Grandmaster", "Master"] ])
