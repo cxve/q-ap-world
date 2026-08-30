@@ -70,8 +70,8 @@ class QUPrules:
             has_shards = shards >= cost or (count_shards >= min_corruption_shards and count_challenges == 2)
             return has_shards
 
-        if not "corrupted" in data: return crystals
-        else: return corruption_shards
+        if "corrupted" in data: return corruption_shards
+        else: return crystals
 
     def skill_dist_check(self, num_current, num_max):
         num_gates = self.world.options.skillDistGates.value

@@ -443,12 +443,13 @@ while len(_shop_roots) > 0:
     m = "", 9999
     for k in _shop_roots:
         if shop_data[k]["cost"] < m[1]: m = k, shop_data[k]["cost"]
-    if not "corrupted" in shop_data[k]: 
-        _cost += m[1]
-        shop_costs[m[0]] = _cost
-    else: 
+    if "corrupted" in shop_data[k]: 
         _cost_corrupted += m[1]
         shop_costs[m[0]] = _cost_corrupted
+    else: 
+        _cost += m[1]
+        shop_costs[m[0]] = _cost
+        #print(f"adding {m[0]} which costs {m[1]} for a total of {_cost}")
     if "children" in shop_data[m[0]]:
         _shop_roots.extend(shop_data[m[0]]["children"])
     _shop_roots.remove(m[0])
