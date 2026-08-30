@@ -48,13 +48,15 @@ class QUPworld(World):
     item_name_to_id = all_item_ids
     location_name_to_id = all_location_ids
 
-    all_items = all_items_with_keys
-    all_locations = all_locations.copy()
-    items_added = 1 # one location always has the victory condition as item!
-    num_skill_cat = [0,0,0,0,0]
-    fixed_skill_pos: list[str] = []
-    feature_items = feature_items.copy()
-    generic_items = generic_items.copy()
+    def __init__(self, multiworld, player: int): 
+        super().__init__(multiworld, player)
+        self.feature_items = deepcopy(feature_items)
+        self.generic_items = deepcopy(generic_items)
+        self.fixed_skill_pos: list[str] = []
+        self.num_skill_cat = [0,0,0,0,0]
+        self.items_added = 1
+        self.all_locations = all_locations.copy()
+        self.all_items = all_items_with_keys.copy()
 
     def collect(self, state, item: Item) -> bool:
         change = super().collect(state, item)
@@ -142,8 +144,7 @@ class QUPworld(World):
                 remove_locations.append("Anomaly 1")
                 remove_locations.extend([ f"{rank} {i}" for i in range(1,6) for rank in ["Grandmaster", "Master"] ])
                 remove_locations.remove("Master 1")
-            for loc in remove_locations:
-                self.all_locations.remove(loc)
+            for loc in remove_locations: self.all_locations.remove(loc)
 
         # make sure player YAML does not require more items than it has locations
         fix_strategy = self.options.fixStrategy.value
