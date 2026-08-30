@@ -88,7 +88,7 @@ class QUPrules:
         return check
 
     def has_difficulty_req_level(self, level: int) -> Callable[[CollectionState], bool]:
-        if level < 4: return lambda state: True
+        if level < 6: return lambda state: True
         req_level = self.calc_skill_req_level(level)
         skill_dist_check = self.skill_dist_check(level, 50)
         skill_check = lambda state: self.count_effective_skills(state) >= req_level and skill_dist_check(state)
@@ -100,7 +100,7 @@ class QUPrules:
         return skill_check_3
 
     def has_difficulty_req_rank(self, rank: int) -> Callable[[CollectionState], bool]:
-        if rank < 2: return lambda state: True
+        if rank < 3: return lambda state: True
         req_rank = self.calc_skill_req_rank(rank)
         skill_dist_check = self.skill_dist_check(rank, 55)
         skill_check = lambda state: self.count_effective_skills(state) >= req_rank and skill_dist_check(state)
