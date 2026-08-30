@@ -52,6 +52,7 @@ class QUPworld(World):
     item_name_groups = item_name_groups
     items_added = 1 # one location always has the victory condition as item!
     num_skill_cat = [0,0,0,0,0]
+    fixed_skill_pos: list[str] = []
 
     def collect(self, state, item: Item) -> bool:
         change = super().collect(state, item)
@@ -400,6 +401,17 @@ class QUPworld(World):
         self.multiworld.get_location(goal_rank_name, self.player).place_locked_item(self.create_event("Victory"))
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 
+    def generate_basic(self) -> None:
+        num_fixed_skills = self.options.itemPoolFixedSkillNum.value
+        valid_pos = [i for i in range(91)]
+        for i in range(num_fixed_skills):
+            self.random.shuffle(valid_pos)
+            pos = valid_pos[0]
+            self.fixed_skill_pos.append(str(pos))
+            valid_pos.remove(pos)
+            if pos + 1 in valid_pos: valid_pos.remove(pos + 1)
+            if pos - 1 in valid_pos: valid_pos.remove(pos - 1)
+
     def fill_slot_data(self) -> Dict[str, Any]:
         return self.options.as_dict("champ", "goal",
                                     "itemPoolEfficiencyUpgradePoints",
@@ -409,4 +421,7 @@ class QUPworld(World):
                                     "sanityNumChallengesTier4",
                                     "itemPoolCrystalNum",
                                     "itemPoolCorruptionShardNum",
-                                    "itemPoolTotalSkillNum") | { "version": self.world_version.as_simple_string() }
+                                    "itemPoolTotalSkillNum") | { 
+                                        "version": self.world_version.as_simple_string(),
+                                        "fixedSkillPos": ",".join(self.fixed_skill_pos)
+                                    }
