@@ -41,15 +41,15 @@ class QUPworld(World):
     """
     game = "Q-UP"
     web = QUPweb()
-    options_dataclass = QUPoptions
     options: QUPoptions
-    all_items = all_items_with_keys
-    item_name_to_id = all_item_ids
-    all_locations = all_locations.copy()
-    location_name_to_id = all_location_ids
+    options_dataclass = QUPoptions
     origin_region_name = "Game"
-    progressive_crystal_number = 0
     item_name_groups = item_name_groups
+    item_name_to_id = all_item_ids
+    location_name_to_id = all_location_ids
+
+    all_items = all_items_with_keys
+    all_locations = all_locations.copy()
     items_added = 1 # one location always has the victory condition as item!
     num_skill_cat = [0,0,0,0,0]
     fixed_skill_pos: list[str] = []
@@ -195,9 +195,6 @@ class QUPworld(World):
         return QUPitem(name, item_data["classification"], item_id, self.player)
 
     def create_items(self) -> None:
-        num_upgrade_points = self.options.itemPoolSkillUpgradeNum.value
-        num_crystals = self.options.itemPoolCrystalNum.value
-        num_corruption_shards = self.options.itemPoolCorruptionShardNum.value
         num_fixed_skills = self.options.itemPoolFixedSkillNum.value
         num_total_skills = self.options.itemPoolTotalSkillNum.value
         num_fixed_skills = num_fixed_skills if num_fixed_skills < num_total_skills else num_total_skills
