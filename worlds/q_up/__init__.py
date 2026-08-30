@@ -119,6 +119,12 @@ class QUPworld(World):
         num_crystals = ceil(self.options.itemPoolCrystalNum.value / efficiency_crystals)
         num_corruption_shards = ceil(self.options.itemPoolCorruptionShardNum.value / efficiency_corruption_shards)
 
+        num_add_qblock_breaker = self.options.itemPoolAdditionalQBlockBreaker.value
+        if num_add_qblock_breaker > 0:
+            for feat in self.feature_items:
+                if feat["name"] == "PROGRESSIVE_QBLOCK_BREAKER": 
+                    feat["count"] += num_add_qblock_breaker
+                    break
         if self.options.removeContentAfterGoal.value and goal < 55:
             remove_locations = [ f"CHEATER {i}" for i in range(2, 6)]
             remove_locations.append("Novice")

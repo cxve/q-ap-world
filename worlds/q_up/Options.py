@@ -185,6 +185,21 @@ class ItemPoolEfficiencyUpgradePoints(Range):
     range_end = 4
     default = 2
 
+class ItemPoolAdditionalQBlockBreaker(Range):
+    """
+    If your goal is to reach Novice rank, you need all nine QBlock Breaker.
+    It is the only strict requirement in the entire game, which means you
+    are often waiting to receive your final QBlock Breaker to goal.
+
+    If you want to reduce the chance of getting stuck behind QBlock Breaker,
+    you can add extra ones here. Might be useful when playing in lobbies with
+    a lot of slots.
+    """
+    display_name = "Additional QBlock Breaker"
+    range_start = 0
+    range_end = 3
+    default = 0
+
 class SkillDistGates(Choice):
     """
     Decide when the randomizer will enforce skill type distribution settings.
@@ -305,7 +320,6 @@ class SanityNumChallengesTier4(Range):
 class QUPoptions(PerGameCommonOptions):
     champ: Champ
     itemPoolTotalSkillNum: ItemPoolTotalSkillNum
-    #itemPoolSignaturePercent: ItemPoolSignaturePercent
     itemPoolFixedSkillNum: ItemPoolFixedSkillNum
     itemPoolHypernodeNum: ItemPoolHypernodeNum
 
@@ -315,6 +329,8 @@ class QUPoptions(PerGameCommonOptions):
     itemPoolEfficiencyCrystals: ItemPoolEfficiencyCrystals
     itemPoolEfficiencyCorruptionShards: ItemPoolEfficiencyCorruptionShards
     itemPoolEfficiencyUpgradePoints: ItemPoolEfficiencyUpgradePoints
+
+    itemPoolAdditionalQBlockBreaker: ItemPoolAdditionalQBlockBreaker
 
     skillDistGates: SkillDistGates
     skillDistQFlat: SkillDistQFlat
@@ -340,7 +356,8 @@ option_groups = [
             ItemPoolCorruptionShardNum,
             ItemPoolEfficiencyUpgradePoints,
             ItemPoolEfficiencyCrystals,
-            ItemPoolEfficiencyCorruptionShards
+            ItemPoolEfficiencyCorruptionShards,
+            ItemPoolAdditionalQBlockBreaker
         ]),
         OptionGroup("Item Distribution", [
             SkillDistGates,
