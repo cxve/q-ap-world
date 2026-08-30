@@ -45,7 +45,8 @@ class QUPrules:
         data = shop_data[location]
         cost = shop_costs[location]
         num_skills = self.world.options.itemPoolTotalSkillNum.value
-        req_rank = data["rank"] if "rank" in data else min(ceil(cost / 10), num_skills)
+        req_rank = data["rank"] if "rank" in data else 0
+        if req_rank < 1 and data["cost"] > 300: req_rank = 30
         efficiency_crystals = self.world.options.itemPoolEfficiencyCrystals.value
         efficiency_corruption_shards = self.world.options.itemPoolEfficiencyCorruptionShards.value
         min_crystals = self.world.options.itemPoolCrystalNum.value
@@ -57,7 +58,7 @@ class QUPrules:
             count_crystals = state.count("Crystals", self.player) * efficiency_crystals * (count_recycling + 1)
             crystals = sum(crystal_rewards[0:count_crystals])
             crystals += max(0, count_crystals - len(crystal_rewards)) * 100
-            crystals += sum(mail_crystal_rewards[0:ceil((count_crystals + 1) / min_crystals * 10)])
+            crystals += sum(mail_crystal_rewards[0:count_crystals + 1])
             has_crystals = crystals >= cost or (count_crystals >= min_crystals and count_recycling == 2)
             return has_crystals
 
