@@ -448,8 +448,6 @@ class QUPworld(World):
                                     "itemPoolEfficiencyUpgradePoints",
                                     "itemPoolEfficiencyCrystals",
                                     "itemPoolEfficiencyCorruptionShards",
-                                    "sanityNumChallenges",
-                                    "sanityNumChallengesTier4",
                                     "itemPoolCrystalNum",
                                     "itemPoolCorruptionShardNum",
                                     "itemPoolTotalSkillNum") | { 
