@@ -394,6 +394,8 @@ class QUPworld(World):
                 self.items_added += 1
 
         _filler_items = filler_items.copy()
+        if self.options.goal.value < 50 and self.options.removeContentAfterGoal.value: 
+            _filler_items.remove("Corruption Shards")
         filler_count = len(self.all_locations) + num_challenges - self.items_added
         filler_count = filler_count if filler_count > 0 else 0
         for i in range(filler_count):
