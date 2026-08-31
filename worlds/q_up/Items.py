@@ -39,9 +39,14 @@ generic_items: List[ItemDict] = [
         "name": "Gold",
         "count": 0,
         "classification": ItemClassification.filler
+    },
+    {
+        "name": "Random Gear",
+        "count": 0,
+        "classification": ItemClassification.filler
     }
 ]
-filler_items = ["Crystals", "Gold", "Corruption Shards", "Crystals"]
+filler_items = ["Random Gear", "Random Gear", "Random Gear", "Random Gear", "Gold", "Gold", "Crystals", "Corruption Shards"]
 generic_item_ids = get_ids(generic_items, 1000 + 200)
 
 def build(x): 

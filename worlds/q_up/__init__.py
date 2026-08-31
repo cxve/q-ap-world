@@ -393,11 +393,12 @@ class QUPworld(World):
                 self.multiworld.itempool.append(new_item)
                 self.items_added += 1
 
+        _filler_items = filler_items.copy()
         filler_count = len(self.all_locations) + num_challenges - self.items_added
         filler_count = filler_count if filler_count > 0 else 0
         for i in range(filler_count):
-            index = i % len(filler_items)
-            new_item = self.create_item(filler_items[index])
+            index = i % len(_filler_items)
+            new_item = self.create_item(_filler_items[index])
             self.multiworld.itempool.append(new_item)
 
     def create_regions(self) -> None:
