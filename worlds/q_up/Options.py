@@ -162,12 +162,12 @@ class ItemPoolEfficiencyCorruptionShards(Range):
     the contents of each drop. For example, instead of receiving one 
     corruption shard twice, you receive two corruption shards once.
 
-    To avoid fill errors, it is recommended to set this to at least 2.
+    Increase this option, if you are experiencing fill errors.
     """
     display_name = "Corruption Shard Item Efficiency"
     range_start = 1
     range_end = 4
-    default = 2
+    default = 1
 
 class ItemPoolEfficiencyUpgradePoints(Range):
     """
