@@ -50,4 +50,11 @@ def get_trigger_ratio():
         print(f"Champ {champ} has {num_on_trigger} on trigger skills and {num_auto_trigger} auto trigger skills.")
         print(f"    That's {num_on_trigger / num_auto_trigger} on trigger skills for each auto trigger skill!")
 
-calc_req_crystal_num()
+def get_full_trigger_ratio():
+    result: dict[str, int] = {}
+    for k, v in skill_directory.items():
+        if v["trigger"] in result: result[v["trigger"]] += 1
+        else: result[v["trigger"]] = 1
+    print(result)
+
+get_full_trigger_ratio()
