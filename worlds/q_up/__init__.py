@@ -113,14 +113,6 @@ class QUPworld(World):
         # apply remove content after goal option
         goal = self.options.goal.value
 
-        efficiency_upgrade_points = self.options.itemPoolEfficiencyUpgradePoints.value
-        efficiency_crystals = self.options.itemPoolEfficiencyCrystals.value
-        efficiency_corruption_shards = self.options.itemPoolEfficiencyCorruptionShards.value
-
-        num_upgrade_points = ceil(self.options.itemPoolSkillUpgradeNum.value / efficiency_upgrade_points)
-        num_crystals = ceil(self.options.itemPoolCrystalNum.value / efficiency_crystals)
-        num_corruption_shards = ceil(self.options.itemPoolCorruptionShardNum.value / efficiency_corruption_shards)
-
         num_add_qblock_breaker = self.options.itemPoolAdditionalQBlockBreaker.value
         if num_add_qblock_breaker > 0:
             for feat in self.feature_items:
@@ -152,6 +144,14 @@ class QUPworld(World):
 
         num_challenges = self.options.sanityNumChallenges.value
         sum_locations = len(self.all_locations) + num_challenges
+
+        efficiency_upgrade_points = self.options.itemPoolEfficiencyUpgradePoints.value
+        efficiency_crystals = self.options.itemPoolEfficiencyCrystals.value
+        efficiency_corruption_shards = self.options.itemPoolEfficiencyCorruptionShards.value
+
+        num_upgrade_points = ceil(self.options.itemPoolSkillUpgradeNum.value / efficiency_upgrade_points)
+        num_crystals = ceil(self.options.itemPoolCrystalNum.value / efficiency_crystals)
+        num_corruption_shards = ceil(self.options.itemPoolCorruptionShardNum.value / efficiency_corruption_shards)
 
         num_hypernodes = self.options.itemPoolHypernodeNum.value
         num_total_skills = self.options.itemPoolTotalSkillNum.value
