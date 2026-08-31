@@ -92,7 +92,7 @@ feature_items: List[ItemDict] = [
     {"name": "SHOP_LOCK", "count": 1, "classification": ItemClassification.useful},
     {"name": "NEW_BUSINESS_MODEL", "count": 0, "classification": ItemClassification.filler},
     {"name": "PROGRESSIVE_STATS", "count": 3, "classification": ItemClassification.filler},
-    {"name": "LOADOUTS", "count": 0, "classification": ItemClassification.filler},
+    {"name": "LOADOUTS", "count": 1, "classification": ItemClassification.filler},
     {"name": "PROGRESSIVE_SHOP_REROLL", "count": 2, "classification": ItemClassification.useful}]
 
 feature_ids = get_ids(feature_items, 1000)
