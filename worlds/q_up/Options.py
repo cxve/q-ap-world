@@ -127,10 +127,9 @@ class ItemPoolCrystalNum(Range):
 
 class ItemPoolEfficiencyCrystals(Range):
     """
-    This setting increases the amount of crystals you receive at once.
-    In turn, it reduces the amount of crystals drops in the item pool.
-    For example, when set to 2, it will give twice as many crystals at
-    once and reduce the number of crystals in the item pool by half (1/2).
+    This setting will reduce the number of item drops by increasing
+    the contents of each drop. For example, instead of receiving one 
+    crystal twice, you receive two crystals once.
 
     To avoid fill errors, it is recommended to set this to at least 2.
     """
@@ -159,10 +158,9 @@ class ItemPoolCorruptionShardNum(Range):
 
 class ItemPoolEfficiencyCorruptionShards(Range):
     """
-    This setting increases the amount of Corruption Shards you receive at once.
-    In turn, it reduces the amount of Corruption Shard drops in the item pool.
-    For example, when set to 2, it will give twice as many shards at
-    once and reduce the number of shards in the item pool by half (1/2).
+    This setting will reduce the number of item drops by increasing
+    the contents of each drop. For example, instead of receiving one 
+    corruption shard twice, you receive two corruption shards once.
 
     To avoid fill errors, it is recommended to set this to at least 2.
     """
@@ -173,10 +171,9 @@ class ItemPoolEfficiencyCorruptionShards(Range):
 
 class ItemPoolEfficiencyUpgradePoints(Range):
     """
-    This setting increases the amount of upgrade points you receive at once.
-    In turn, it reduces the amount of upgrade points drops in the item pool.
-    For example, when set to 2, it will give twice as many upgrade points at
-    once and reduce the number of upgrade points in the item pool by half (1/2).
+    This setting will reduce the number of item drops by increasing
+    the contents of each drop. For example, instead of receiving one 
+    upgrade point twice, you receive two upgrade points once.
 
     To avoid fill errors, it is recommended to set this to at least 2.
     """
