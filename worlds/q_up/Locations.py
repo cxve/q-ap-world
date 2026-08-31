@@ -29,8 +29,13 @@ build_challenge_location = lambda tier, amount: ["Tier " + str(tier) + " Challen
 build_challenge_location_ids = lambda tier, amount: \
     { location: i + 300 + 10 * (tier - 1) + base_id for i, location in enumerate(build_challenge_location(tier, amount)) }
 
+recycling_set_locations = ["Double Triple Set", "Six of a Kind Set", "Typical Set", "Two by Four Set", "Four of a Kind Set", "PVP Set", "Three Pairs Set", "Timeline Saturated Set", "Three of a Kind Set", "Two Pairs Set"]
+
+recycling_set_location_ids = { location: i + 400 + base_id for i, location in enumerate(recycling_set_locations) }
+
 all_locations = level_locations + rank_locations + features
 
 all_location_ids = {**rank_location_ids, **level_location_ids, **feature_location_ids,
                     **build_challenge_location_ids(1,10),**build_challenge_location_ids(2,10),
-                    **build_challenge_location_ids(3,10), **build_challenge_location_ids(4,10)}
+                    **build_challenge_location_ids(3,10), **build_challenge_location_ids(4,10), 
+                    **recycling_set_location_ids}

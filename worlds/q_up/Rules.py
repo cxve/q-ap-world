@@ -18,7 +18,18 @@ class QUPrules:
     def __init__(self, world: QUPworld) -> None:
         self.player = world.player
         self.world = world
-        self.location_rules = {}
+        self.location_rules = {
+            "Double Triple Set": self.has_recycling_set_req(), 
+            "Six of a Kind Set": self.has_recycling_set_req(), 
+            "Two by Four Set": self.has_recycling_set_req(), 
+            "Four of a Kind Set": self.has_recycling_set_req(), 
+            "Three Pairs Set": self.has_recycling_set_req(), 
+            "Three of a Kind Set": self.has_recycling_set_req(), 
+            "Two Pairs Set": self.has_recycling_set_req(),
+            "Typical Set": self.has_recycling_set_req(), 
+            "Timeline Saturated Set": self.has_recycling_set_req(), 
+            "PVP Set": self.has_recycling_set_req("HONOR_DUELS"),
+        }
         for k in shop_data.keys():
             self.location_rules[k] = self.has_shop_req(k)
         for i in range(len(rank_locations)):
@@ -29,6 +40,11 @@ class QUPrules:
             for i in range(10):
                 self.location_rules["Tier " + str(tier + 1) + " Challenge " + str(i + 1)] = (
                     self.has_challenge_req(0 if tier + 1 < 3 else 1 if tier + 1 < 4 else 2))
+
+    def has_recycling_set_req(self, add_req: str | None = None) -> Callable[[CollectionState], bool]:
+        has_recycling = lambda state: state.has("PROGRESSIVE_ITEM_RECYCLING_SYSTEM", self.player, 2)
+        if add_req == None: return has_recycling
+        else: return lambda state: state.has(add_req, self.player) and has_recycling(state)
 
     def has_challenge_req(self, num_slots: int) -> Callable[[CollectionState], bool]:
         return lambda state: (state.has("PROGRESSIVE_CHALLENGES", self.player)

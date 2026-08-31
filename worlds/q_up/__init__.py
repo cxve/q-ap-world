@@ -10,7 +10,7 @@ from .Data import skill_names, skill_names_flat, signature_skill_names, signatur
     special_require_specific, hypernode_names, skill_directory, shop_data
 from .Items import base_id, QUPitem, all_item_ids, all_items_with_keys, generic_items, ItemDict, feature_items, item_name_groups, filler_items
 from .Locations import all_locations, QUPlocation, rank_location_ids, rank_locations, level_location_ids, \
-    level_locations, feature_location_ids, build_challenge_location_ids, all_location_ids
+    level_locations, feature_location_ids, build_challenge_location_ids, all_location_ids, recycling_set_locations, recycling_set_location_ids
 from .Options import QUPoptions, option_groups
 from .Rules import QUPrules
 from .Logic import QUPstate
@@ -138,6 +138,8 @@ class QUPworld(World):
                 remove_locations.extend([ f"{rank} {i}" for i in range(1,6) for rank in ["Grandmaster", "Master"] ])
                 remove_locations.remove("Master 1")
             for loc in remove_locations: self.all_locations.remove(loc)
+        if self.options.sanityRecyclingSet.value:
+            self.all_locations.extend(recycling_set_locations)
 
         # make sure player YAML does not require more items than it has locations
         fix_strategy = self.options.fixStrategy.value
@@ -412,6 +414,7 @@ class QUPworld(World):
         region.add_locations({ location: _rank_location_ids[location] for location in rank_locations if location in self.all_locations })
         region.add_locations({ location: level_location_ids[location] for location in level_locations })
         region.add_locations({ location: feature_location_ids[location] for location in features if location in self.all_locations })
+        region.add_locations({ location: recycling_set_location_ids[location] for location in recycling_set_locations if location in self.all_locations })
         challenges = [0, 0, 0, 0]
         for i in range(self.options.sanityNumChallenges.value):
             if challenges[3] < self.options.sanityNumChallengesTier4.value and challenges[2] > challenges[3] + 1:

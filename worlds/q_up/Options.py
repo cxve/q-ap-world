@@ -313,6 +313,13 @@ class SanityNumChallengesTier4(Range):
     range_end = 5
     default = 1
 
+class SanityRecyclingSet(DefaultOnToggle):
+    """
+    Receive a check for each submitted recycling target set. 
+    Adds 10 locations. Requires 2x PROGRESSIVE_ITEM_RECYCLING_SYSTEM.
+    """
+    display_name = "Recycling Set Sanity"
+
 @dataclass
 class QUPoptions(PerGameCommonOptions):
     champ: Champ
@@ -340,6 +347,7 @@ class QUPoptions(PerGameCommonOptions):
 
     sanityNumChallenges: SanityNumChallenges
     sanityNumChallengesTier4: SanityNumChallengesTier4
+    sanityRecyclingSet: SanityRecyclingSet
     fixStrategy: AutoFixYAML
     goal: Goal
     removeContentAfterGoal: RemoveContentAfterGoal
@@ -369,5 +377,6 @@ option_groups = [
         OptionGroup("Sanity", [
            SanityNumChallenges,
            SanityNumChallengesTier4,
+           SanityRecyclingSet,
         ])
     ]
