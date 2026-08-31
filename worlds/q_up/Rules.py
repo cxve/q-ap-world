@@ -53,8 +53,8 @@ class QUPrules:
     def has_crystals(self, state: CollectionState) -> bool:
         return state.has("Crystals", self.player)
 
-    def count_effective_skills(self, state) -> int:
-        if state.qup_trigger_skill_num[self.player] > 0: return state.qup_skill_num[self.player]
+    def count_effective_skills(self, state, max: int) -> int:
+        if state.qup_trigger_skill_num[self.player] > 0 or state.qup_skill_num[self.player] >= max: return state.qup_skill_num[self.player]
         else: return state.qup_triggerable_skill_num[self.player]
 
     def has_shop_req(self, location: str) -> Callable[[CollectionState], bool]:
@@ -108,7 +108,8 @@ class QUPrules:
         if level < 6: return lambda state: True
         req_level = self.calc_skill_req_level(level)
         skill_dist_check = self.skill_dist_check(level, 50)
-        skill_check = lambda state: self.count_effective_skills(state) >= req_level and skill_dist_check(state)
+        num_skills = self.world.options.itemPoolTotalSkillNum.value
+        skill_check = lambda state: self.count_effective_skills(state, num_skills) >= req_level and skill_dist_check(state)
         if level <= 11: return lambda state: state.has("PROGRESSIVE_CHALLENGES", self.player) or skill_check(state)
         skill_check_2 = lambda state: state.has("ITEM_SHOP", self.player) and skill_check(state)
         skill_check_3 = lambda state: state.has("PROGRESSIVE_CHALLENGES", self.player) and skill_check_2(state)
@@ -120,7 +121,8 @@ class QUPrules:
         if rank < 3: return lambda state: True
         req_rank = self.calc_skill_req_rank(rank)
         skill_dist_check = self.skill_dist_check(rank, 55)
-        skill_check = lambda state: self.count_effective_skills(state) >= req_rank and skill_dist_check(state)
+        num_skills = self.world.options.itemPoolTotalSkillNum.value
+        skill_check = lambda state: self.count_effective_skills(state, num_skills) >= req_rank and skill_dist_check(state)
         if rank <= 4: return skill_check
         skill_check_2 = lambda state: state.has("ITEM_SHOP", self.player) and skill_check(state)
         if rank <= 15: return skill_check_2
