@@ -127,12 +127,24 @@ class QUPrules:
         skill_check_2 = lambda state: state.has("ITEM_SHOP", self.player) and skill_check(state)
         if rank <= 15: return skill_check_2
         skill_check_3 = lambda state: state.has("PROGRESSIVE_CHALLENGES", self.player) and skill_check_2(state)
-        if rank > 52: return lambda state: (
+        if rank > 51: return lambda state: (
                 state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 9 and skill_check_3(state))
-        if rank > 48: return lambda state: (
+        if rank > 44: return lambda state: (
                 state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 8 and skill_check_3(state))
-        if rank > 46: return lambda state: (
+        if rank > 42: return lambda state: (
                 state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 7 and skill_check_3(state))
+        if rank > 40: return lambda state: (
+                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 6 and skill_check_3(state))
+        if rank > 39: return lambda state: (
+                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 5 and skill_check_3(state))
+        if rank > 38: return lambda state: (
+                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 4 and skill_check_3(state))
+        if rank > 37: return lambda state: (
+                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 3 and skill_check_3(state))
+        if rank > 36: return lambda state: (
+                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 2 and skill_check_3(state))
+        if rank > 35: return lambda state: (
+                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 1 and skill_check_3(state))
         return skill_check_3
 
     def calc_skill_req_level(self, level: int) -> int:
