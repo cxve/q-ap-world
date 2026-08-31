@@ -2,7 +2,7 @@ from .Data import corruption_shard_rewards, mail_crystal_rewards, crystal_reward
 from math import ceil, floor
 from typing import Dict, Callable, TYPE_CHECKING
 from BaseClasses import CollectionState
-from .Locations import rank_locations, level_locations
+from .Locations import rank_locations, level_locations, combo_locations
 
 if TYPE_CHECKING:
     from . import QUPworld
@@ -40,6 +40,21 @@ class QUPrules:
             for i in range(10):
                 self.location_rules["Tier " + str(tier + 1) + " Challenge " + str(i + 1)] = (
                     self.has_challenge_req(0 if tier + 1 < 3 else 1 if tier + 1 < 4 else 2))
+        for i in range(15):
+            self.location_rules[combo_locations[i]] = self.has_combo_req((i + 1) * 10)
+
+    # rough estimate whether a combo sanity check is in logic
+    # no clue if this formula is good
+    def has_combo_req(self, target: int) -> Callable[[CollectionState], bool]:
+        num_total_skills = self.world.options.itemPoolTotalSkillNum.value
+        def can_combo(state):
+            raw_skill_count = self.count_effective_skills(state, num_total_skills)
+            if raw_skill_count >= num_total_skills: return True
+            skill_count = ceil(raw_skill_count / 2)
+            trigger_num = state.qup_dist_trigger_num[self.player]
+            possible_trigger_num = floor(pow(1.4, trigger_num) * 6) - 6
+            return skill_count + possible_trigger_num >= target
+        return can_combo
 
     def has_recycling_set_req(self, add_req: str | None = None) -> Callable[[CollectionState], bool]:
         has_recycling = lambda state: state.has("PROGRESSIVE_ITEM_RECYCLING_SYSTEM", self.player, 2)

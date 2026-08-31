@@ -33,9 +33,13 @@ recycling_set_locations = ["Double Triple Set", "Six of a Kind Set", "Typical Se
 
 recycling_set_location_ids = { location: i + 400 + base_id for i, location in enumerate(recycling_set_locations) }
 
+combo_locations = [ f"{i + 1} nodes triggered in one flip" for i in range(300) ]
+
+combo_location_ids = { location: i + 1000 + base_id for i, location in enumerate(combo_locations) }
+
 all_locations = level_locations + rank_locations + features
 
 all_location_ids = {**rank_location_ids, **level_location_ids, **feature_location_ids,
                     **build_challenge_location_ids(1,10),**build_challenge_location_ids(2,10),
                     **build_challenge_location_ids(3,10), **build_challenge_location_ids(4,10), 
-                    **recycling_set_location_ids}
+                    **recycling_set_location_ids, **combo_location_ids}

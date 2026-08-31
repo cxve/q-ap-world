@@ -320,6 +320,20 @@ class SanityRecyclingSet(DefaultOnToggle):
     """
     display_name = "Recycling Set Sanity"
 
+class SanityNumTriggerCombo(Range):
+    """
+    Adds checks for the amount of nodes triggered in one flip.
+    Locations are placed in increments of 10, so you receive
+    the first check at 10 triggers in one flip, then 20, and so on.
+
+    By default, it adds 10 checks, so you need to trigger 100 nodes
+    in one flip by the end of the game.
+    """
+    display_name = "Number of Trigger Combo Sanity Locations"
+    range_start = 0
+    range_end = 15
+    default = 10
+
 @dataclass
 class QUPoptions(PerGameCommonOptions):
     champ: Champ
@@ -348,6 +362,7 @@ class QUPoptions(PerGameCommonOptions):
     sanityNumChallenges: SanityNumChallenges
     sanityNumChallengesTier4: SanityNumChallengesTier4
     sanityRecyclingSet: SanityRecyclingSet
+    sanityNumTriggerCombo: SanityNumTriggerCombo
     fixStrategy: AutoFixYAML
     goal: Goal
     removeContentAfterGoal: RemoveContentAfterGoal
@@ -378,5 +393,6 @@ option_groups = [
            SanityNumChallenges,
            SanityNumChallengesTier4,
            SanityRecyclingSet,
+           SanityNumTriggerCombo
         ])
     ]
