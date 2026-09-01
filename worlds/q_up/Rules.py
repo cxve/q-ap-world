@@ -75,7 +75,6 @@ class QUPrules:
     def has_shop_req(self, location: str) -> Callable[[CollectionState], bool]:
         data = shop_data[location]
         cost = shop_costs[location]
-        num_skills = self.world.options.itemPoolTotalSkillNum.value
         req_rank = data["rank"] if "rank" in data else 0
         if req_rank < 30 and data["cost"] > 300: req_rank = 30
         efficiency_crystals = self.world.options.itemPoolEfficiencyCrystals.value
@@ -96,7 +95,8 @@ class QUPrules:
         def corruption_shards(state: CollectionState):
             if req_rank > 0 and not self.has_difficulty_req_rank(req_rank)(state): return False
             count_challenges = state.count("PROGRESSIVE_CHALLENGES", self.player)
-            count_shards = state.count("Corruption Shards", self.player) * efficiency_corruption_shards * (count_challenges + 1)
+            mod_challenges = 1.5 if count_challenges > 1 else 1
+            count_shards = floor(state.count("Corruption Shards", self.player) * efficiency_corruption_shards * mod_challenges)
             shards = sum(corruption_shard_rewards[0:count_shards])
             shards += max(0, count_shards - len(corruption_shard_rewards)) * 10
             has_shards = shards >= cost or (count_shards >= min_corruption_shards and count_challenges == 2)
@@ -142,24 +142,15 @@ class QUPrules:
         skill_check_2 = lambda state: state.has("ITEM_SHOP", self.player) and skill_check(state)
         if rank <= 15: return skill_check_2
         skill_check_3 = lambda state: state.has("PROGRESSIVE_CHALLENGES", self.player) and skill_check_2(state)
-        if rank > 51: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 9 and skill_check_3(state))
-        if rank > 44: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 8 and skill_check_3(state))
-        if rank > 42: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 7 and skill_check_3(state))
-        if rank > 40: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 6 and skill_check_3(state))
-        if rank > 39: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 5 and skill_check_3(state))
-        if rank > 38: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 4 and skill_check_3(state))
-        if rank > 37: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 3 and skill_check_3(state))
-        if rank > 36: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 2 and skill_check_3(state))
-        if rank > 35: return lambda state: (
-                state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 1 and skill_check_3(state))
+        if rank > 51: return lambda state: state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 9 and skill_check_3(state)
+        if rank > 44: return lambda state: state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 8 and skill_check_3(state)
+        if rank > 42: return lambda state: state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 7 and skill_check_3(state)
+        if rank > 40: return lambda state: state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 6 and skill_check_3(state)
+        if rank > 39: return lambda state: state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 5 and skill_check_3(state)
+        if rank > 38: return lambda state: state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 4 and skill_check_3(state)
+        if rank > 37: return lambda state: state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 3 and skill_check_3(state)
+        if rank > 36: return lambda state: state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 2 and skill_check_3(state)
+        if rank > 35: return lambda state: state.count("PROGRESSIVE_QBLOCK_BREAKER", self.player) >= 1 and skill_check_3(state)
         return skill_check_3
 
     def calc_skill_req_level(self, level: int) -> int:

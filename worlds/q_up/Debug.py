@@ -3,7 +3,7 @@ from math import ceil
 
 def calc_req_crystal_num():
     bought = []
-    for count_crystals in range(35):
+    for count_crystals in range(50):
         crystals = sum(crystal_rewards[0:count_crystals])
         crystals += max(0, count_crystals - len(crystal_rewards)) * 100
         crystals += sum(mail_crystal_rewards[0:ceil((count_crystals + 1) / 35 * 10)])
@@ -21,7 +21,7 @@ def calc_req_crystal_num():
 
 def calc_req_shard_num():
     bought = []
-    for count_shards in range(19):
+    for count_shards in range(20):
         print(sum(corruption_shard_rewards[0:count_shards]))
         shards = sum(corruption_shard_rewards[0:count_shards])
         shards += max(0, count_shards - len(corruption_shard_rewards)) * 10
@@ -30,11 +30,11 @@ def calc_req_shard_num():
             if not "corrupted" in shop_data[k]: continue
             if shards * 1.5 <= v: continue
             bought.append(k)
-            print([count_shards, k])
+            print([count_shards, k, v])
     for k in shop_costs.keys():
         if k in bought: continue
         if not "corrupted" in shop_data[k]: continue
-        print([35, k])
+        print([20, k])
         
 #def transform_tagged_skills():
 #    return { key: { "trigger": "", "tags": tagged_skills[key] } for key in tagged_skills }
@@ -57,4 +57,4 @@ def get_full_trigger_ratio():
         else: result[v["trigger"]] = 1
     print(result)
 
-get_full_trigger_ratio()
+calc_req_shard_num()

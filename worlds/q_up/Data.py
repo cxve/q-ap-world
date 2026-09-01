@@ -433,7 +433,7 @@ shop_data: dict[str, ShopDict] = {
     "LOADOUTS": { "cost": 25, "rank": 20 }
 }
 
-shop_roots = ["GAME_STORE", "HONOR_DUELS", "QBLOCK_BREAKER_1", "KNOWLEDGE_TRANSFER", "TURBO_SPEED", "NEW_BUSINESS_MODEL", "STATS_", "LOADOUTS"]
+shop_roots = ["GAME_STORE", "HONOR_DUELS", "QBLOCK_BREAKER_1", "KNOWLEDGE_TRANSFER", "TURBO_SPEED", "NEW_BUSINESS_MODEL", "STATS_", "LOADOUTS", "EXTREMELY_COOL_SHOPS_SOMETIMES"]
 
 shop_costs = {}
 _shop_roots = shop_roots.copy()
@@ -442,14 +442,17 @@ _cost_corrupted = 0
 while len(_shop_roots) > 0:
     m = "", 9999
     for k in _shop_roots:
+        if k in shop_costs: 
+            _shop_roots.remove(k)
+            continue
         if shop_data[k]["cost"] < m[1]: m = k, shop_data[k]["cost"]
-    if "corrupted" in shop_data[k]: 
+    if "corrupted" in shop_data[m[0]].keys(): 
         _cost_corrupted += m[1]
         shop_costs[m[0]] = _cost_corrupted
     else: 
         _cost += m[1]
         shop_costs[m[0]] = _cost
-        #print(f"adding {m[0]} which costs {m[1]} for a total of {_cost}")
+        print(f"adding {m[0]} which costs {m[1]} for a total of {_cost}")
     if "children" in shop_data[m[0]]:
         _shop_roots.extend(shop_data[m[0]]["children"])
     _shop_roots.remove(m[0])
