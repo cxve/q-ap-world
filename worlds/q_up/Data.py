@@ -452,7 +452,7 @@ while len(_shop_roots) > 0:
     else: 
         _cost += m[1]
         shop_costs[m[0]] = _cost
-        print(f"adding {m[0]} which costs {m[1]} for a total of {_cost}")
+        #print(f"adding {m[0]} which costs {m[1]} for a total of {_cost}")
     if "children" in shop_data[m[0]]:
         _shop_roots.extend(shop_data[m[0]]["children"])
     _shop_roots.remove(m[0])
