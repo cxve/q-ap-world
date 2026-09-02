@@ -406,7 +406,7 @@ shop_data: dict[str, ShopDict] = {
     "ADDITIONAL_SHOP_SLOT_2": { "cost": 100, "children": ["ADDITIONAL_SHOP_SLOT_3"], "rank": 5 },
     "ADDITIONAL_SHOP_SLOT_3": { "cost": 200, "children": ["ADDITIONAL_SHOP_SLOT_4", "SHOP_REROLL"], "rank": 5 },
     "ADDITIONAL_SHOP_SLOT_4": { "cost": 350, "children": ["ADDITIONAL_SHOP_SLOT_5"], "rank": 5 },
-    "ADDITIONAL_SHOP_SLOT_5": { "cost": 500 },
+    "ADDITIONAL_SHOP_SLOT_5": { "cost": 500, "rank": 5 },
     "QBLOCK_BREAKER_1": { "cost": 2, "children": ["QBLOCK_BREAKER_2"], "rank": 35, "corrupted": True },
     "QBLOCK_BREAKER_2": { "cost": 5, "children": ["QBLOCK_BREAKER_3"], "rank": 35, "corrupted": True },
     "QBLOCK_BREAKER_3": { "cost": 11, "children": ["QBLOCK_BREAKER_4"], "rank": 35, "corrupted": True },
