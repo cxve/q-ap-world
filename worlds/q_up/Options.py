@@ -1,7 +1,7 @@
 from Options import OptionGroup
 from dataclasses import dataclass
 
-from Options import Choice, Range, DefaultOnToggle, PerGameCommonOptions
+from Options import Choice, Range, DefaultOnToggle, PerGameCommonOptions, NamedRange
 
 
 class Champ(Choice):
@@ -44,21 +44,6 @@ class RemoveContentAfterGoal(DefaultOnToggle):
     If you are playing with auto release, this setting should be turned on.
     """
     display_name = "Remove Content After Goal?"
-
-class AutoFixYAML(Choice):
-    """
-    Choose what the randomizer should do, if your YAML introduces more
-    progression items than locations.
-
-    **Adjust Efficiency** will reduce the number of item drops by increasing
-    the contents of each drop. For example, instead of receiving one upgrade
-    point twice, you receive two upgrade points once. (Recommended!)
-    **Fail Generation** will disable YAML fixing. If your YAML has too many
-    progression items, generating a multiworld is going to always fail.
-    """
-    option_prefer_adjusting_efficiency = 1
-    option_prefer_failing_generation = 0
-    default = 1
 
 class ItemPoolTotalSkillNum(Range):
     """
@@ -214,7 +199,7 @@ class SkillDistGates(Choice):
     option_every_5_levels = 10
     default = 5
 
-class SkillDistQFlat(Range):
+class SkillDistQFlat(NamedRange):
     """
     Set how many skills should be of type "Flat Q".
     Higher values = more skills of that type, lower values = fewer skills of that type.
@@ -224,8 +209,11 @@ class SkillDistQFlat(Range):
     range_start = 5
     range_end = 15
     default = 8
+    special_range_names = {
+        "default": 8
+    }
 
-class SkillDistQMult(Range):
+class SkillDistQMult(NamedRange):
     """
     Set how many skills should be of type "Q Mult".
     Higher values = more skills of that type, lower values = fewer skills of that type.
@@ -235,8 +223,11 @@ class SkillDistQMult(Range):
     range_start = 5
     range_end = 15
     default = 7
+    special_range_names = {
+        "default": 7
+    }
 
-class SkillDistTrigger(Range):
+class SkillDistTrigger(NamedRange):
     """
     Set how many skills should be of type "Trigger".
     Higher values = more skills of that type, lower values = fewer skills of that type.
@@ -246,8 +237,11 @@ class SkillDistTrigger(Range):
     range_start = 5
     range_end = 15
     default = 10
+    special_range_names = {
+        "default": 10
+    }
 
-class SkillDistGold(Range):
+class SkillDistGold(NamedRange):
     """
     Set how many skills should be of type "Gold".
     Higher values = more skills of that type, lower values = fewer skills of that type.
@@ -257,8 +251,13 @@ class SkillDistGold(Range):
     range_start = 0
     range_end = 5
     default = 2
+    special_range_names = {
+        "disabled": 0,
+        "just one skill": 1,
+        "default": 2
+    }
 
-class SkillDistXP(Range):
+class SkillDistXP(NamedRange):
     """
     Set how many skills should be of type "XP".
     Higher values = more skills of that type, lower values = fewer skills of that type.
@@ -268,8 +267,13 @@ class SkillDistXP(Range):
     range_start = 0
     range_end = 5
     default = 2
+    special_range_names = {
+        "disabled": 0,
+        "just one skill": 1,
+        "default": 2
+    }
 
-class SkillDistOther(Range):
+class SkillDistOther(NamedRange):
     """
     Set how many skills should be of other types not listed above.
     Higher values = more skills of that type, lower values = fewer skills of that type.
@@ -279,6 +283,11 @@ class SkillDistOther(Range):
     range_start = 0
     range_end = 15
     default = 6
+    special_range_names = {
+        "disabled": 0,
+        "just one skill": 1,
+        "default": 6
+    }
 
 class SkillDistSignature(Range):
     """
@@ -291,64 +300,115 @@ class SkillDistSignature(Range):
     range_end = 50
     default = 25
 
-class SanityNumChallenges(Range):
+class SanityNumChallenges(NamedRange):
     """
     This setting adds special challenges that reward location checks.
     By default, this will add 4x tier 1 challenges, 3x tier 2 challenges,
     2x tier 3 challenges and 1x tier 4 challenge.
     """
-    display_name = "Amount of Challenge Locations"
+    display_name = "Challenges: Amount of Locations"
     range_start = 0
     range_end = 27
     default = 10
+    special_range_names = {
+        "disabled": 0,
+        "default": 10,
+        "no tier 3": 5
+    }
 
-class SanityNumChallengesTier4(Range):
+class SanityNumChallengesTier4(NamedRange):
     """
     Here you can choose the maximum amount of tier 4 challenges to add.
     Tier 4 challenges only appear if amount of challenge locations is set
     to at least 10.
     """
-    display_name = "Maximum amount of Tier 4 Challenges"
+    display_name = "Challenges: Maximum Amount of Tier 4 Challenges"
     range_start = 0
     range_end = 5
     default = 1
+    special_range_names = {
+        "disabled": 0,
+        "default": 1
+    }
 
-class SanityRecyclingSet(DefaultOnToggle):
+class SanityRecyclingSet(Choice):
     """
     Receive a check for each submitted recycling target set. 
     Adds 10 locations. Requires 2x PROGRESSIVE_ITEM_RECYCLING_SYSTEM.
     """
-    display_name = "Recycling Set Sanity"
+    display_name = "Recycling Set: Mode"
+    option_vanilla_sets = 1
+    option_disabled = 0
+    default = 1
 
-class SanityNumTriggerCombo(Range):
+class SanityTriggerComboMax(NamedRange):
     """
+    If you want to disable this sanity, set this to 0.
+
     Adds checks for the amount of nodes triggered in one flip.
-    Locations are placed in increments of 10, so you receive
-    the first check at 10 triggers in one flip, then 20, and so on.
+    This option changes the maximum amount of triggers required to
+    get all trigger checks.
 
-    By default, it adds 10 checks, so you need to trigger 100 nodes
-    in one flip by the end of the game.
+    By default, the last location for this sanity is placed at
+    100 triggers in one flip. You can change the increment below.
     """
-    display_name = "Number of Trigger Combo Sanity Locations"
+    display_name = "Trigger Combo: Maximum Amount of Triggers"
     range_start = 0
-    range_end = 15
+    range_end = 150
+    default = 100
+    special_range_names = {
+        "disabled": 0,
+        "easier": 50,
+        "default": 100
+    }
+
+class SanityTriggerComboIncrements(NamedRange):
+    """
+    Choose the increment for the combo locations. The default
+    increment is 10, so the first check is at 10 triggers, then
+    20, and so on.
+    """
+    display_name = "Trigger Combo: Increments"
+    range_start = 1
+    range_end = 150
     default = 10
+    special_range_names = {
+        "every 5th trigger": 5,
+        "every 10th trigger (default)": 10,
+        "only once": 150
+    }
+
+class FixEfficiency(DefaultOnToggle):
+    """
+    This option takes effect when your YAML introduces more progression items
+    than locations.
+
+    When enabled, it will reduce the number of item drops by increasing
+    the contents of each drop. For example, instead of receiving one upgrade
+    point twice, you receive two upgrade points once.
+
+    When disabled and your YAML has too many progression items, generating a 
+    multiworld is going to fail.
+    """
+    display_name = "YAML Fixes: Automatically Increase Efficiency"
 
 @dataclass
 class QUPoptions(PerGameCommonOptions):
+    goal: Goal
     champ: Champ
+    removeContentAfterGoal: RemoveContentAfterGoal
+
     itemPoolTotalSkillNum: ItemPoolTotalSkillNum
     itemPoolFixedSkillNum: ItemPoolFixedSkillNum
     itemPoolHypernodeNum: ItemPoolHypernodeNum
-
+    itemPoolAdditionalQBlockBreaker: ItemPoolAdditionalQBlockBreaker
     itemPoolSkillUpgradeNum: ItemPoolSkillUpgradeNum
     itemPoolCorruptionShardNum: ItemPoolCorruptionShardNum
     itemPoolCrystalNum: ItemPoolCrystalNum
+
     itemPoolEfficiencyCrystals: ItemPoolEfficiencyCrystals
     itemPoolEfficiencyCorruptionShards: ItemPoolEfficiencyCorruptionShards
     itemPoolEfficiencyUpgradePoints: ItemPoolEfficiencyUpgradePoints
-
-    itemPoolAdditionalQBlockBreaker: ItemPoolAdditionalQBlockBreaker
 
     skillDistGates: SkillDistGates
     skillDistQFlat: SkillDistQFlat
@@ -362,10 +422,10 @@ class QUPoptions(PerGameCommonOptions):
     sanityNumChallenges: SanityNumChallenges
     sanityNumChallengesTier4: SanityNumChallengesTier4
     sanityRecyclingSet: SanityRecyclingSet
-    sanityNumTriggerCombo: SanityNumTriggerCombo
-    fixStrategy: AutoFixYAML
-    goal: Goal
-    removeContentAfterGoal: RemoveContentAfterGoal
+    sanityTriggerComboMax: SanityTriggerComboMax
+    sanityTriggerComboIncrements: SanityTriggerComboIncrements
+    
+    fixEfficiency: FixEfficiency
 
 option_groups = [
         OptionGroup("Item Pool", [
@@ -393,6 +453,10 @@ option_groups = [
            SanityNumChallenges,
            SanityNumChallengesTier4,
            SanityRecyclingSet,
-           SanityNumTriggerCombo
+           SanityTriggerComboMax,
+           SanityTriggerComboIncrements
+        ]),
+        OptionGroup("Auto Fix YAML Options", [
+            FixEfficiency
         ])
     ]

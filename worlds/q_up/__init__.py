@@ -141,11 +141,14 @@ class QUPworld(World):
             for loc in remove_locations: self.all_locations.remove(loc)
         if self.options.sanityRecyclingSet.value:
             self.all_locations.extend(recycling_set_locations)
-        for i in range(self.options.sanityNumTriggerCombo.value):
-            self.all_locations.append(combo_locations[(i + 1) * 10 - 1])
+        for i in range(self.options.sanityTriggerComboMax.value):
+            if (i + 1) % self.options.sanityTriggerComboIncrements.value == 0:
+                self.all_locations.append(combo_locations[i])
+            elif i == self.options.sanityTriggerComboMax.value - 1:
+                self.all_locations.append(combo_locations[i])
 
         # make sure player YAML does not require more items than it has locations
-        fix_strategy = self.options.fixStrategy.value
+        fix_efficiency = self.options.fixEfficiency.value
 
         num_challenges = self.options.sanityNumChallenges.value
         sum_locations = len(self.all_locations) + num_challenges
@@ -176,7 +179,7 @@ class QUPworld(World):
                 num_corruption_shards = ceil(self.options.itemPoolCorruptionShardNum.value / efficiency_corruption_shards)
                 sum_items_suggestion = num_upgrade_points + num_crystals + num_corruption_shards
                 if sum_items + sum_items_suggestion < sum_locations:
-                    if fix_strategy == 0:
+                    if not fix_efficiency:
                         raise OptionError(f"Your YAML generates too many progression items!\n"
                                           f"Here is a suggested fix: In your YAML file, please set Upgrade Point "
                                           f"Efficiency to at least {efficiency_upgrade_points}, Crystal Efficiency to "
