@@ -1,6 +1,7 @@
+from Options import OptionGroup
 from dataclasses import dataclass
 
-from Options import Choice, Range, DefaultOnToggle, PerGameCommonOptions
+from Options import Choice, Range, DefaultOnToggle, PerGameCommonOptions, NamedRange
 
 
 class Champ(Choice):
@@ -33,6 +34,16 @@ class Goal(Choice):
     option_anomaly = 35
     option_master = 25
     default = 55
+
+class RemoveContentAfterGoal(DefaultOnToggle):
+    """
+    Removes items and locations that only become relevant after the goal.
+    This setting will make the randomizer easier. If you want, you can 
+    balance it by slightly reducing the number of items inside the item pool below.
+
+    If you are playing with auto release, this setting should be turned on.
+    """
+    display_name = "Remove Content After Goal?"
 
 class ItemPoolTotalSkillNum(Range):
     """
@@ -85,7 +96,7 @@ class ItemPoolHypernodeNum(Range):
     range_end = 8
     default = 3
 
-class ItemPoolProgressiveCrystalsNum(Range):
+class ItemPoolCrystalNum(Range):
     """
     Crystals are usually a major part of the game's progression,
     but they also take up a high number of possible locations.
@@ -101,10 +112,9 @@ class ItemPoolProgressiveCrystalsNum(Range):
 
 class ItemPoolEfficiencyCrystals(Range):
     """
-    This setting increases the amount of crystals you receive at once.
-    In turn, it reduces the amount of crystals drops in the item pool.
-    For example, when set to 2, it will give twice as many crystals at
-    once and reduce the number of crystals in the item pool by half (1/2).
+    This setting will reduce the number of item drops by increasing
+    the contents of each drop. For example, instead of receiving one 
+    crystal twice, you receive two crystals once.
 
     To avoid fill errors, it is recommended to set this to at least 2.
     """
@@ -113,12 +123,42 @@ class ItemPoolEfficiencyCrystals(Range):
     range_end = 4
     default = 2
 
+class ItemPoolCorruptionShardNum(Range):
+    """
+    Corruption Shards are part of the game's act 2 progression,
+    but they also take up a high number of possible locations.
+
+    Here you can set a minimum amount of Corruption Shards to be included
+    in the item pool. Corruption Shards can still appear as filler item,
+    regardless of this setting.
+
+    The vanilla amount of corruption shard drops is 19, but since
+    corruption shards can also drop as filler items the default
+    amount was decreased to 10.
+    """
+    display_name = "Minimum amount of Corruption Shards to include"
+    range_start = 0
+    range_end = 20
+    default = 10
+
+class ItemPoolEfficiencyCorruptionShards(Range):
+    """
+    This setting will reduce the number of item drops by increasing
+    the contents of each drop. For example, instead of receiving one 
+    corruption shard twice, you receive two corruption shards once.
+
+    Increase this option, if you are experiencing fill errors.
+    """
+    display_name = "Corruption Shard Item Efficiency"
+    range_start = 1
+    range_end = 4
+    default = 1
+
 class ItemPoolEfficiencyUpgradePoints(Range):
     """
-    This setting increases the amount of upgrade points you receive at once.
-    In turn, it reduces the amount of upgrade points drops in the item pool.
-    For example, when set to 2, it will give twice as many upgrade points at
-    once and reduce the number of upgrade points in the item pool by half (1/2).
+    This setting will reduce the number of item drops by increasing
+    the contents of each drop. For example, instead of receiving one 
+    upgrade point twice, you receive two upgrade points once.
 
     To avoid fill errors, it is recommended to set this to at least 2.
     """
@@ -127,21 +167,39 @@ class ItemPoolEfficiencyUpgradePoints(Range):
     range_end = 4
     default = 2
 
-class SkillDistMode(Choice):
+class ItemPoolAdditionalQBlockBreaker(Range):
     """
-    Choose how the generator should distribute skills of certain types.
+    If your goal is to reach Novice rank, you need all nine QBlock Breaker.
+    It is the only strict requirement in the entire game, which means you
+    are often waiting to receive your final QBlock Breaker to goal.
 
-    Disabled: Skill type distribution will be entirely random and the settings below will be ignored.
-    Approx: The amount of each skill type will be roughly as you defined below.
-    Exact: You will receive exactly the distribution to defined below.
+    If you want to reduce the chance of getting stuck behind QBlock Breaker,
+    you can add extra ones here. Might be useful when playing in lobbies with
+    a lot of slots.
     """
-    display_name = "Skill Distribution Mode"
-    option_disabled = 0
-    option_approx = 1
-    option_exact = 2
-    default = 1
+    display_name = "Additional QBlock Breaker"
+    range_start = 0
+    range_end = 3
+    default = 0
 
-class SkillDistQFlat(Range):
+class SkillDistGates(Choice):
+    """
+    Decide when the randomizer will enforce skill type distribution settings.
+    By default, the randomizer will make sure your in-logic inventory will match
+    the distribution settings once every 10 levels. Lower values result in more
+    linear progression while higher values cause a more unpredictable distribution.
+
+    "Never" means skill type distribution will be entirely random and the settings below will be ignored.
+    """
+    display_name = "Number of Skill Distribution Gates"
+    option_never = -1
+    option_after_50_levels = 1
+    option_every_25_levels = 2
+    option_every_10_levels = 5
+    option_every_5_levels = 10
+    default = 5
+
+class SkillDistQFlat(NamedRange):
     """
     Set how many skills should be of type "Flat Q".
     Higher values = more skills of that type, lower values = fewer skills of that type.
@@ -151,8 +209,11 @@ class SkillDistQFlat(Range):
     range_start = 5
     range_end = 15
     default = 8
+    special_range_names = {
+        "default": 8
+    }
 
-class SkillDistQMult(Range):
+class SkillDistQMult(NamedRange):
     """
     Set how many skills should be of type "Q Mult".
     Higher values = more skills of that type, lower values = fewer skills of that type.
@@ -162,8 +223,11 @@ class SkillDistQMult(Range):
     range_start = 5
     range_end = 15
     default = 7
+    special_range_names = {
+        "default": 7
+    }
 
-class SkillDistTrigger(Range):
+class SkillDistTrigger(NamedRange):
     """
     Set how many skills should be of type "Trigger".
     Higher values = more skills of that type, lower values = fewer skills of that type.
@@ -173,8 +237,11 @@ class SkillDistTrigger(Range):
     range_start = 5
     range_end = 15
     default = 10
+    special_range_names = {
+        "default": 10
+    }
 
-class SkillDistGold(Range):
+class SkillDistGold(NamedRange):
     """
     Set how many skills should be of type "Gold".
     Higher values = more skills of that type, lower values = fewer skills of that type.
@@ -184,8 +251,13 @@ class SkillDistGold(Range):
     range_start = 0
     range_end = 5
     default = 2
+    special_range_names = {
+        "disabled": 0,
+        "just one skill": 1,
+        "default": 2
+    }
 
-class SkillDistXP(Range):
+class SkillDistXP(NamedRange):
     """
     Set how many skills should be of type "XP".
     Higher values = more skills of that type, lower values = fewer skills of that type.
@@ -195,8 +267,13 @@ class SkillDistXP(Range):
     range_start = 0
     range_end = 5
     default = 2
+    special_range_names = {
+        "disabled": 0,
+        "just one skill": 1,
+        "default": 2
+    }
 
-class SkillDistOther(Range):
+class SkillDistOther(NamedRange):
     """
     Set how many skills should be of other types not listed above.
     Higher values = more skills of that type, lower values = fewer skills of that type.
@@ -206,6 +283,11 @@ class SkillDistOther(Range):
     range_start = 0
     range_end = 15
     default = 6
+    special_range_names = {
+        "disabled": 0,
+        "just one skill": 1,
+        "default": 6
+    }
 
 class SkillDistSignature(Range):
     """
@@ -218,44 +300,117 @@ class SkillDistSignature(Range):
     range_end = 50
     default = 25
 
-class SanityNumChallenges(Range):
+class SanityNumChallenges(NamedRange):
     """
     This setting adds special challenges that reward location checks.
     By default, this will add 4x tier 1 challenges, 3x tier 2 challenges,
     2x tier 3 challenges and 1x tier 4 challenge.
     """
-    display_name = "Amount of Challenge Locations"
+    display_name = "Challenges: Amount of Locations"
     range_start = 0
     range_end = 27
     default = 10
+    special_range_names = {
+        "disabled": 0,
+        "default": 10,
+        "no tier 3": 5
+    }
 
-class SanityNumChallengesTier4(Range):
+class SanityNumChallengesTier4(NamedRange):
     """
     Here you can choose the maximum amount of tier 4 challenges to add.
     Tier 4 challenges only appear if amount of challenge locations is set
     to at least 10.
     """
-    display_name = "Maximum amount of Tier 4 Challenges"
+    display_name = "Challenges: Maximum Amount of Tier 4 Challenges"
     range_start = 0
     range_end = 5
     default = 1
+    special_range_names = {
+        "disabled": 0,
+        "default": 1
+    }
+
+class SanityRecyclingSet(Choice):
+    """
+    Receive a check for each submitted recycling target set. 
+    Adds 10 locations. Requires 2x PROGRESSIVE_ITEM_RECYCLING_SYSTEM.
+    """
+    display_name = "Recycling Set: Mode"
+    option_vanilla_sets = 1
+    option_disabled = 0
+    default = 1
+
+class SanityTriggerComboMax(NamedRange):
+    """
+    If you want to disable this sanity, set this to 0.
+
+    Adds checks for the amount of nodes triggered in one flip.
+    This option changes the maximum amount of triggers required to
+    get all trigger checks.
+
+    By default, the last location for this sanity is placed at
+    100 triggers in one flip. You can change the increment below.
+    """
+    display_name = "Trigger Combo: Maximum Amount of Triggers"
+    range_start = 0
+    range_end = 150
+    default = 100
+    special_range_names = {
+        "disabled": 0,
+        "easier": 50,
+        "default": 100
+    }
+
+class SanityTriggerComboIncrements(NamedRange):
+    """
+    Choose the increment for the combo locations. The default
+    increment is 10, so the first check is at 10 triggers, then
+    20, and so on.
+    """
+    display_name = "Trigger Combo: Increments"
+    range_start = 1
+    range_end = 150
+    default = 10
+    special_range_names = {
+        "every 5th trigger": 5,
+        "every 10th trigger (default)": 10,
+        "only once": 150
+    }
+
+class FixEfficiency(DefaultOnToggle):
+    """
+    This option takes effect when your YAML introduces more progression items
+    than locations.
+
+    When enabled, it will reduce the number of item drops by increasing
+    the contents of each drop. For example, instead of receiving one upgrade
+    point twice, you receive two upgrade points once.
+
+    When disabled and your YAML has too many progression items, generating a 
+    multiworld is going to fail.
+    """
+    display_name = "YAML Fixes: Automatically Increase Efficiency"
 
 @dataclass
 class QUPoptions(PerGameCommonOptions):
+    goal: Goal
     champ: Champ
+    removeContentAfterGoal: RemoveContentAfterGoal
+
     itemPoolTotalSkillNum: ItemPoolTotalSkillNum
-    #itemPoolSignaturePercent: ItemPoolSignaturePercent
     itemPoolFixedSkillNum: ItemPoolFixedSkillNum
     itemPoolHypernodeNum: ItemPoolHypernodeNum
-
+    itemPoolAdditionalQBlockBreaker: ItemPoolAdditionalQBlockBreaker
     itemPoolSkillUpgradeNum: ItemPoolSkillUpgradeNum
-    #itemPoolCorruptionShardNum: ItemPoolCorruptionShardNum
-    itemPoolProgressiveCrystalsNum: ItemPoolProgressiveCrystalsNum
+    itemPoolCorruptionShardNum: ItemPoolCorruptionShardNum
+    itemPoolCrystalNum: ItemPoolCrystalNum
+
     itemPoolEfficiencyCrystals: ItemPoolEfficiencyCrystals
-    #itemPoolEfficiencyCorruptionShards: ItemPoolEfficiencyCorruptionShards
+    itemPoolEfficiencyCorruptionShards: ItemPoolEfficiencyCorruptionShards
     itemPoolEfficiencyUpgradePoints: ItemPoolEfficiencyUpgradePoints
 
-    skillDistMode: SkillDistMode
+    skillDistGates: SkillDistGates
     skillDistQFlat: SkillDistQFlat
     skillDistQMult: SkillDistQMult
     skillDistTrigger: SkillDistTrigger
@@ -266,4 +421,42 @@ class QUPoptions(PerGameCommonOptions):
 
     sanityNumChallenges: SanityNumChallenges
     sanityNumChallengesTier4: SanityNumChallengesTier4
-    goal: Goal
+    sanityRecyclingSet: SanityRecyclingSet
+    sanityTriggerComboMax: SanityTriggerComboMax
+    sanityTriggerComboIncrements: SanityTriggerComboIncrements
+    
+    fixEfficiency: FixEfficiency
+
+option_groups = [
+        OptionGroup("Item Pool", [
+            ItemPoolTotalSkillNum,
+            ItemPoolFixedSkillNum,
+            ItemPoolSkillUpgradeNum,
+            ItemPoolCrystalNum,
+            ItemPoolCorruptionShardNum,
+            ItemPoolEfficiencyUpgradePoints,
+            ItemPoolEfficiencyCrystals,
+            ItemPoolEfficiencyCorruptionShards,
+            ItemPoolAdditionalQBlockBreaker
+        ]),
+        OptionGroup("Item Distribution", [
+            SkillDistGates,
+            SkillDistSignature,
+            SkillDistQFlat,
+            SkillDistQMult,
+            SkillDistTrigger,
+            SkillDistGold,
+            SkillDistXP,
+            SkillDistOther
+        ]),
+        OptionGroup("Sanity", [
+           SanityNumChallenges,
+           SanityNumChallengesTier4,
+           SanityRecyclingSet,
+           SanityTriggerComboMax,
+           SanityTriggerComboIncrements
+        ]),
+        OptionGroup("Auto Fix YAML Options", [
+            FixEfficiency
+        ])
+    ]
