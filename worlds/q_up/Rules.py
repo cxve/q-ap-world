@@ -57,7 +57,7 @@ class QUPrules:
         return can_combo
 
     def has_recycling_set_req(self, add_req: str | None = None) -> Callable[[CollectionState], bool]:
-        has_recycling = lambda state: state.has("PROGRESSIVE_ITEM_RECYCLING_SYSTEM", self.player, 2)
+        has_recycling = lambda state: state.has("ITEM_SHOP", self.player) and state.has("PROGRESSIVE_ITEM_RECYCLING_SYSTEM", self.player, 2)
         if add_req == None: return has_recycling
         else: return lambda state: state.has(add_req, self.player) and has_recycling(state)
 
