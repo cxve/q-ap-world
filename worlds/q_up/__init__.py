@@ -278,13 +278,15 @@ class QUPworld(World):
             for i in range(len(gen_data["tags"])): gen_data["tags"][i] = _gen_data["tags"][i]
             gen_data["skills"].extend(set(gen_data["skills"]) ^ set(_gen_data["skills"]))
 
-        def skill_add_from_pool(gen_data: GenData, _pool, num):
+        def skill_add_from_pool(gen_data: GenData, _pool, num: int, only_count_pool: bool = False):
             pool = _pool.copy()
             self.random.shuffle(pool)
             num_start = len(gen_data["skills"])
             for i in range(len(pool)):
                 skill_add(gen_data, pool[i])
-                if len(gen_data["skills"]) - num_start >= num: break
+                if (only_count_pool):
+                    if len(set(gen_data["skills"]) & set(_pool)) - num_start >= num: break
+                elif len(gen_data["skills"]) - num_start >= num: break
             gen_data["skills"].sort()
 
         if dist_gates >= 0:
@@ -351,7 +353,7 @@ class QUPworld(World):
                 "tags": [0, 0, 0, 0, 0, 0]
             }
 
-            skill_add_from_pool(gen_data, pool_fixed, num_fixed_skills)
+            skill_add_from_pool(gen_data, pool_fixed, num_fixed_skills, True)
             skill_add_from_pool(gen_data, pool_signature, num_signature)
             for i in range(6):
                 skill_add_from_pool(gen_data, pool_tags[i], self.num_skill_cat[i] - gen_data["tags"][i])
