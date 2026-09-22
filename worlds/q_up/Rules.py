@@ -40,8 +40,8 @@ class QUPrules:
             for i in range(10):
                 self.location_rules["Tier " + str(tier + 1) + " Challenge " + str(i + 1)] = (
                     self.has_challenge_req(0 if tier + 1 < 3 else 1 if tier + 1 < 4 else 2))
-        for i in range(15):
-            self.location_rules[combo_locations[i]] = self.has_combo_req((i + 1) * 10)
+        for i in range(150):
+            self.location_rules[combo_locations[i]] = self.has_combo_req(i + 1)
 
     # rough estimate whether a combo sanity check is in logic
     # no clue if this formula is good
