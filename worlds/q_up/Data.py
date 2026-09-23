@@ -789,6 +789,10 @@ for k, v in skill_directory.items():
     for tag in v["tags"]:
         tag_to_skill[tag] = tag_to_skill.get(tag, []) + [k]
 
+trigger_to_skill = {}
+for k, v in skill_directory.items():
+    trigger_to_skill[v["trigger"]] = trigger_to_skill.get(v["trigger"], []) + [k]
+
 skill_cat_to_idx = {
     "q_flat": 0,
     "q_mult": 1,

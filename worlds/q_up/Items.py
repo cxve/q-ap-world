@@ -3,7 +3,7 @@ from dataclasses import field
 from BaseClasses import Item, ItemClassification
 from typing import TypedDict, List
 
-from .Data import hypernode_names, skill_names_flat, tag_to_skill, skill_names, upgradable_skill_names, signature_skill_names
+from .Data import hypernode_names, skill_names_flat, tag_to_skill, skill_names, upgradable_skill_names, signature_skill_names, trigger_to_skill
 
 # apparently, can be any number greater than 0
 base_id = 1_000_000
@@ -105,9 +105,15 @@ all_items_with_keys = {item["name"]: item for item in all_items}
 
 item_name_groups: dict[str, set[str]] = {
     "Skill": set(skill_names_flat),
+    
     "Trigger Skill": set(tag_to_skill["trigger"]),
     "Flat Q Skill": set(tag_to_skill["q_flat"]),
     "Q Mult Skill": set(tag_to_skill["q_mult"]),
+    
+    "On Win Skill": set(trigger_to_skill["win"]),
+    "On Loss Skill": set(trigger_to_skill["loss"]),
+    "On Flip Skill": set(trigger_to_skill["flip"]),
+    "On Trigger Skill": set(trigger_to_skill["trigger"]),
 
     "Hypernode": set(hypernode_names),
     "Feature": set([feat["name"] for feat in feature_items])
